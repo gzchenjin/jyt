@@ -657,7 +657,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div>&nbsp;
 <div id="Index_Index_TB_financialAssessment">
-<div><strong>财务评估：</strong><span style="color: #ff0000;">财务部50万以上项目参加投标评估会，BC类不涉及外采的<span style="color: #000000;"><strong>刘椰韵</strong></span>参加，SM的<span style="color: #000000;"><strong>钟晓华</strong></span>，其他情况<strong><span style="color: #000000;">戴亮</span></strong>参加。</span></div>
+<div><strong>财务评估：</strong><span style="color: #ff0000;">财务部50万以上项目参加投标评估会，BC类不涉及外采的<span style="color: #000000;"><strong>刘经理</strong></span>参加，SM的<span style="color: #000000;"><strong>钟经理</strong></span>，其他情况<strong><span style="color: #000000;">戴经理</span></strong>参加。</span></div>
 </div>
 <div>&nbsp;</div>
 <div>&nbsp;&nbsp;</div>
@@ -1582,4 +1582,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 }); // End of DOMContentLoaded
+
 
