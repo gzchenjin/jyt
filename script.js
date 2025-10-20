@@ -1096,13 +1096,22 @@ document.addEventListener('DOMContentLoaded', function() {
     function _formatProjectRoles(inputText) {
         if (!inputText) return "【铁三角信息未填写】。";
         const roles = {};
-        const pattern = /(.+?)：\n(.+?)\((.+?)\)/gs;
+        // --- 修改后的正则表达式 ---
+        const pattern = /(.+?)\s*[:：]\s*(.+?)\s*[(（](.+?)[)）]/gs; 
+        // --- 修改结束 ---
         let match;
         while ((match = pattern.exec(inputText.trim())) !== null) {
+            // Trim potential extra spaces around names and departments
             roles[match[1].trim()] = { name: match[2].trim(), department: match[3].trim() };
         }
         const getInfo = (role) => roles[role] || { name: "【待定】", department: "【待定】" };
         const pm = getInfo("项目经理"), sales = getInfo("销售经理"), solution = getInfo("方案经理"), delivery = getInfo("交付经理");
+        // Ensure department is captured correctly even if name extraction failed slightly
+        if (!pm.department && roles["项目经理"]?.department) pm.department = roles["项目经理"].department;
+        if (!sales.department && roles["销售经理"]?.department) sales.department = roles["销售经理"].department;
+        if (!solution.department && roles["方案经理"]?.department) solution.department = roles["方案经理"].department;
+        if (!delivery.department && roles["交付经理"]?.department) delivery.department = roles["交付经理"].department;
+        
         return `项目经理是${pm.name}(${pm.department})，销售经理是${sales.name}(${sales.department})，方案经理是${solution.name}(${solution.department})，交付经理是${delivery.name}(${delivery.department})。`;
     }
 
@@ -1142,10 +1151,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         let leadDepartment = "【未知事业部】";
         const tjsRawText = formData.ironTriangleInput || '';
-        const pmMatch = tjsRawText.match(/项目经理：\n(?:.+?)\((.+?)\)/s);
-        if (pmMatch) leadDepartment = pmMatch[1].trim();
+        // --- 修改后的正则表达式 ---
+        const pmPattern = /项目经理\s*[:：]\s*(?:.+?)\s*[(（](.+?)[)）]/s;
+        // --- 修改结束 ---
+        const pmMatch = tjsRawText.match(pmPattern);
+        if (pmMatch && pmMatch[1]) {
+             leadDepartment = pmMatch[1].trim();
+        }
 
-        const tjsSummary = _formatProjectRoles(tjsRawText);
+        const tjsSummary = _formatProjectRoles(tjsRawText); // Uses the updated function from Step 1
+
+        // Delivery details summaries (logic remains the same)
 
         let assistDepartmentsSummary = '';
         let deliverySummary = '';
@@ -1434,12 +1450,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function performPMAutoSearch() {
         const ironTriangleText = DOMElements.ironTriangleInput.value;
-        const match = ironTriangleText.match(/项目经理：\n(.+?)\((.+?)\)/s);
+        // --- 修改后的正则表达式 ---
+        const pattern = /项目经理\s*[:：]\s*(.+?)\s*[(（](.+?)[)）]/s;
+        // --- 修改结束 ---
+        const match = ironTriangleText.match(pattern);
+        
         if (!match) {
             DOMElements.pmAutoResult.innerHTML = "未在铁三角信息中找到有效的项目经理信息。";
             return;
         }
-        const [_, pmName, pmDept] = match.map(s => s.trim());
+        const pmName = match[1].trim();
+        const pmDept = match[2].trim();
         const matches = PM_DATA.filter(p => p.项目经理 === pmName);
         
         if (matches.length === 0) {
@@ -1490,11 +1511,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const getV = (id) => form.querySelector(`#${id}`).value;
         
         let roles = {};
-        const pattern = /(.+?)：\n(.+?)\((.+?)\)/gs;
+        // --- 修改后的正则表达式 ---
+        const pattern = /(.+?)\s*[:：]\s*(.+?)\s*[(（](.+?)[)）]/gs;
+        // --- 修改结束 ---
+        const ironTriangleText = DOMElements.ironTriangleInput.value.trim();
         let match;
-        while ((match = pattern.exec(DOMElements.ironTriangleInput.value.trim())) !== null) {
-            roles[match[1].trim()] = { name: match[2].trim(), department: match[3].trim() };
+        while ((match = pattern.exec(ironTriangleText)) !== null) {
+             roles[match[1].trim()] = { name: match[2].trim(), department: match[3].trim() };
         }
+        
         const getRoleString = roleName => {
             const info = roles[roleName];
             return info && info.name && info.department ? `${roleName}：${info.name}【${info.department}】` : roleName;
@@ -1717,3 +1742,4 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 }); // End of DOMContentLoaded
+
