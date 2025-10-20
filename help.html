@@ -13,15 +13,16 @@
         .faq-item h3 { margin: 0 0 10px 0; font-size: 1.5em; color: #000000; }
     </style>
     <link rel="icon" type="image/x-icon" href="app_icon.ico">
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-T1E6S4Q0LJ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    {% raw %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-T1E6S4Q0LJ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
 
-  gtag('config', 'G-T1E6S4Q0LJ');
-</script>
+      gtag('config', 'G-T1E6S4Q0LJ');
+    </script>
+    {% endraw %}
 
 </head>
 <body>
@@ -76,3 +77,4 @@
 
 </body>
 </html>
+
