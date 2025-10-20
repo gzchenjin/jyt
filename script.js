@@ -506,7 +506,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div style="margin-left: 40px;"><span style="color: #0000ff;">项目名：XXX</span><br /><span style="color: #0000ff;">商机编号：XXX</span><br /><span style="color: #0000ff;">项目建设内容：XX项目</span><br /><span style="color: #0000ff;">XX事业部负责，XXX建设内容</span><br /><span style="color: #0000ff;">外采原因：因xxx原因，需要外采，外采内容：</span><br /><span style="color: #0000ff;">1）XXX，收入预算XX万，采购预算XX万；</span><br /><span style="color: #0000ff;">2）XXX，收入预算XX万，采购预算XX万；</span></div>
 <div style="margin-left: 40px;"><br /><span style="color: #0000ff;">项目经理签字：xxx</span><br /><span style="color: #0000ff;">部门经理签字：xxx</span><br /><span style="color: #0000ff;">202x/xx/xx</span></div>
 <div style="margin-left: 40px;">&nbsp;</div>
-<div style="margin-left: 40px;"><span style="color: #0000ff;"><span style="color: #ff0000;">&bull;【A类项目】外采产能部门项目经理、部门经理签字，外采说明需扫描，邮件主送砺剑PMO，陈晋，抄送分管领导、部门领导、市场部邓俊韬总、汪倩总</span><br /></span></div>
+<div style="margin-left: 40px;"><span style="color: #0000ff;"><span style="color: #ff0000;">&bull;【A类项目】外采产能部门项目经理、部门经理签字，外采说明需扫描，邮件主送砺剑PMO，陈晋，抄送分管领导、部门领导、市场部邓总、汪总</span><br /></span></div>
 </div>
 <div>
 <div>&nbsp;</div>
@@ -543,7 +543,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div id="Index_SJ_projectCooperationAssessment">
 <div><strong>合作评估：</strong></div>
 <div>&nbsp;</div>
-<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请生态与采购部项目合作评估师参会，对合作伙伴是否有风险进行评估把关、给出评估结论</span><br /><span style="color: #ff0000;">A角：高仲凯 B角：许海燕</span><br />&nbsp;</div>
+<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请生态与采购部项目合作评估师参会，对合作伙伴是否有风险进行评估把关、给出评估结论</span><br /><span style="color: #ff0000;">A角：高经理 B角：许经理</span><br />&nbsp;</div>
 <div style="margin-left: 40px;">&bull;&nbsp;<strong>示例：</strong>评估要点与采购风险要求一致，严禁自有能力合作等<br /><span style="color: #0000ff;">经项目组确认，本项目XXX事业部负责项目XXX工作/内容。XXX（需合作的内容，必须有出处，需核对客户需求清单，不能无中生有）工作/内容，因XXX原因（合作原因，客观有理有据，不能以客情作为合作依据），需要进行标前引入，经评估：本项目最终用户是 ICT 客户XXX，签约客户XXX，拟引入合作伙伴为XXXXX，我司与合作伙伴合作规模为XXX万元，合作内容为XXX，开标时间为XXXX年XX月XX日，能满足客户本项目的需求。经渠道部门、产能部门、生态与采购部评估，建议选择方式是xxxxx（公开遴选，邀请遴选，公开方式，定向方式）。本项目非电信投资项目、前后向公司之间的股东不存在关联性关系，招标文件或前向合同无硬性要求相关资质；开标时间较紧，请项目组尽快提交合作引入材料</span></div>
 </div>
 <div>&nbsp;
@@ -618,7 +618,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 </div>
 <div>&nbsp;</div>
-<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请生态与采购部项目合作评估师参会，对合作伙伴是否有风险进行评估把关、给出评估结论</span><br /><span style="color: #ff0000;">A角：高仲凯 B角：许海燕</span><br />&nbsp;</div>
+<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请生态与采购部项目合作评估师参会，对合作伙伴是否有风险进行评估把关、给出评估结论</span><br /><span style="color: #ff0000;">A角：高经理 B角：许经理</span><br />&nbsp;</div>
 <div style="margin-left: 40px;">&bull;&nbsp;<strong>示例：</strong>评估要点与采购风险要求一致，严禁自有能力合作等<br /><span style="color: #0000ff;">经项目组确认，本项目XXX事业部负责项目XXX工作/内容。XXX（需合作的内容，必须有出处，需核对客户需求清单，不能无中生有）工作/内容，因XXX原因（合作原因，客观有理有据，不能以客情作为合作依据），需要进行标前引入，经评估：本项目最终用户是 ICT 客户XXX，签约客户XXX，拟引入合作伙伴为XXXXX，我司与合作伙伴合作规模为XXX万元，合作内容为XXX，开标时间为XXXX年XX月XX日，能满足客户本项目的需求。经渠道部门、产能部门、生态与采购部评估，建议选择方式是xxxxx（公开遴选，邀请遴选，公开方式，定向方式）。本项目非电信投资项目、前后向公司之间的股东不存在关联性关系，招标文件或前向合同无硬性要求相关资质；开标时间较紧，请项目组尽快提交合作引入材料</span></div>
 </div>
 </div>
@@ -646,7 +646,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div id="Index_TB_maintenanceAssessment">
 <div><strong>运维服务评估意见：</strong></div>
 <div>&nbsp;</div>
-<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请运营管理部参会，会上评估后给出结论<br />A角：熊俊伟 B角：蒋朝豪</span></div>
+<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请运营管理部参会，会上评估后给出结论<br />A角：熊经理 B角：蒋经理</span></div>
 </div>
 <div>&nbsp;&nbsp;
 <div id="Index_TB_testingRequirements">
@@ -720,7 +720,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div id="Index_JD_maintenanceAssessment">
 <div><strong>运维服务评估意见：</strong></div>
 <div>&nbsp;</div>
-<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请运营管理部参会，会上评估后给出结论<br />A角：熊俊伟 B角：蒋朝豪</span></div>
+<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请运营管理部参会，会上评估后给出结论<br />A角：熊经理 B角：蒋经理</span></div>
 </div>
 <div>&nbsp;&nbsp;
 <div id="Index_JD_testingRequirements">
@@ -1582,3 +1582,4 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 }); // End of DOMContentLoaded
+
