@@ -417,6 +417,27 @@ document.addEventListener('DOMContentLoaded', function() {
     {"项目经理": "陶瑞阳", "级别": "初级", "在职部门": "智慧运营事业部"},
     ];
 
+    const EMAIL_DATA = {
+        "大客户服务部": {"leader": ["孙黎", "sunl9.gd@chinatelecom.cn"],"manager": ["邓俊韬", "dengjt2.gd@chinatelecom.cn"]},
+        "大湾区战略客户部": {"leader": ["林希达", "linxd1@chinatelecom.cn"],"manager": ["秦渝", "qiny1.gd@chinatelecom.cn"]},
+        "深圳智慧科技分公司": {"leader": ["倪凌", "sznil.gd@chinatelecom.cn"],"manager": ["陈哲希", "chenzx3.gd@chinatelecom.cn"]},
+        "头部客户服务部": {"leader": ["倪凌", "sznil.gd@chinatelecom.cn"],"manager": ["陈加泉", "chenjq7.gd@chinatelecom.cn"]},
+        "武汉分公司（华中区域中心）业务拓展团队": {"leader": ["孙黎", "sunl9.gd@chinatelecom.cn"],"manager": ["林少伟", "jclinsw.gd@chinatelecom.cn"]},
+        "西南区域中心": {"leader": ["林希达", "linxd1@chinatelecom.cn"],"manager": ["秦渝", "qiny1.gd@chinatelecom.cn"]},
+        "粤东区域中心": {"leader": ["林希达", "linxd1@chinatelecom.cn"],"manager": ["林希达", "linxd1@chinatelecom.cn"]},
+        "IT系统事业部": {"leader": ["黄平", "huangping.gd@chinatelecom.cn"],"manager": ["王明鹏", "wangmp.gd@chinatelecom.cn"]},
+        "安全事业部": {"leader": ["苗乔博", "miaoqb.gd@chinatelecom.cn"],"manager": ["邵艾青", "shaoaq.gd@chinatelecom.cn"]},
+        "大数据AI应用事业部": {"leader": ["廖小文", "jcliaoxw.gd@chinatelecom.cn"],"manager": ["张文熙", "zhangwenxi.gd@chinatelecom.cn"]},
+        "工业交通事业部": {"leader": ["倪凌", "sznil.gd@chinatelecom.cn"],"manager": ["詹先", "zhanx.gd@chinatelecom.cn"]},
+        "数字政府事业部": {"leader": ["林希达", "linxd1@chinatelecom.cn"],"manager": ["刘昌卿", "liucq1.gd@chinatelecom.cn"]},
+        "网络事业部": {"leader": ["倪凌", "sznil.gd@chinatelecom.cn"],"manager": ["谭凯", "tank1.gd@chinatelecom.cn"]},
+        "武汉分公司": {"leader": ["黄平", "huangping.gd@chinatelecom.cn"],"manager": ["林少伟", "jclinsw.gd@chinatelecom.cn"]},
+        "系统集成部": {"leader": ["孙黎", "sunl9.gd@chinatelecom.cn"],"manager": ["管志强", "gzq.gd@chinatelecom.cn"]},
+        "云网事业部": {"leader": ["黄平", "huangping.gd@chinatelecom.cn"],"manager": ["区洪辉", "ouhh1.gd@chinatelecom.cn"]},
+        "运营产品事业部": {"leader": ["孙黎", "sunl9.gd@chinatelecom.cn"],"manager": ["黄峰", "huangfeng1.gd@chinatelecom.cn"]},
+        "智慧业财事业部": {"leader": ["孙黎", "sunl9.gd@chinatelecom.cn"],"manager": ["余晓丽", "yuxl2.gd@chinatelecom.cn"]},
+        "智慧运营事业部": {"leader": ["廖小文", "jcliaoxw.gd@chinatelecom.cn"],"manager": ["张文熙", "zhangwenxi.gd@chinatelecom.cn"]},
+};
 
 
     const HELP_HTML = `
@@ -543,7 +564,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div id="Index_SJ_projectCooperationAssessment">
 <div><strong>合作评估：</strong></div>
 <div>&nbsp;</div>
-<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请生态与采购部项目合作评估师参会，对合作伙伴是否有风险进行评估把关、给出评估结论</span><br /><span style="color: #ff0000;">A角：高经理 B角：许经理</span><br />&nbsp;</div>
+<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请生态与采购部项目合作评估师参会，对合作伙伴是否有风险进行评估把关、给出评估结论</span><br /><span style="color: #ff0000;">A角：高仲凯 B角：许海燕</span><br />&nbsp;</div>
 <div style="margin-left: 40px;">&bull;&nbsp;<strong>示例：</strong>评估要点与采购风险要求一致，严禁自有能力合作等<br /><span style="color: #0000ff;">经项目组确认，本项目XXX事业部负责项目XXX工作/内容。XXX（需合作的内容，必须有出处，需核对客户需求清单，不能无中生有）工作/内容，因XXX原因（合作原因，客观有理有据，不能以客情作为合作依据），需要进行标前引入，经评估：本项目最终用户是 ICT 客户XXX，签约客户XXX，拟引入合作伙伴为XXXXX，我司与合作伙伴合作规模为XXX万元，合作内容为XXX，开标时间为XXXX年XX月XX日，能满足客户本项目的需求。经渠道部门、产能部门、生态与采购部评估，建议选择方式是xxxxx（公开遴选，邀请遴选，公开方式，定向方式）。本项目非电信投资项目、前后向公司之间的股东不存在关联性关系，招标文件或前向合同无硬性要求相关资质；开标时间较紧，请项目组尽快提交合作引入材料</span></div>
 </div>
 <div>&nbsp;
@@ -618,7 +639,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 </div>
 <div>&nbsp;</div>
-<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请生态与采购部项目合作评估师参会，对合作伙伴是否有风险进行评估把关、给出评估结论</span><br /><span style="color: #ff0000;">A角：高经理 B角：许经理</span><br />&nbsp;</div>
+<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请生态与采购部项目合作评估师参会，对合作伙伴是否有风险进行评估把关、给出评估结论</span><br /><span style="color: #ff0000;">A角：高仲凯 B角：许海燕</span><br />&nbsp;</div>
 <div style="margin-left: 40px;">&bull;&nbsp;<strong>示例：</strong>评估要点与采购风险要求一致，严禁自有能力合作等<br /><span style="color: #0000ff;">经项目组确认，本项目XXX事业部负责项目XXX工作/内容。XXX（需合作的内容，必须有出处，需核对客户需求清单，不能无中生有）工作/内容，因XXX原因（合作原因，客观有理有据，不能以客情作为合作依据），需要进行标前引入，经评估：本项目最终用户是 ICT 客户XXX，签约客户XXX，拟引入合作伙伴为XXXXX，我司与合作伙伴合作规模为XXX万元，合作内容为XXX，开标时间为XXXX年XX月XX日，能满足客户本项目的需求。经渠道部门、产能部门、生态与采购部评估，建议选择方式是xxxxx（公开遴选，邀请遴选，公开方式，定向方式）。本项目非电信投资项目、前后向公司之间的股东不存在关联性关系，招标文件或前向合同无硬性要求相关资质；开标时间较紧，请项目组尽快提交合作引入材料</span></div>
 </div>
 </div>
@@ -646,7 +667,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div id="Index_TB_maintenanceAssessment">
 <div><strong>运维服务评估意见：</strong></div>
 <div>&nbsp;</div>
-<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请运营管理部参会，会上评估后给出结论<br />A角：熊经理 B角：蒋经理</span></div>
+<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请运营管理部参会，会上评估后给出结论<br />A角：熊俊伟 B角：蒋朝豪</span></div>
 </div>
 <div>&nbsp;&nbsp;
 <div id="Index_TB_testingRequirements">
@@ -657,7 +678,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div>&nbsp;
 <div id="Index_Index_TB_financialAssessment">
-<div><strong>财务评估：</strong><span style="color: #ff0000;">财务部50万以上项目参加投标评估会，BC类不涉及外采的<span style="color: #000000;"><strong>刘经理</strong></span>参加，SM的<span style="color: #000000;"><strong>钟经理</strong></span>，其他情况<strong><span style="color: #000000;">戴经理</span></strong>参加。</span></div>
+<div><strong>财务评估：</strong><span style="color: #ff0000;">财务部50万以上项目参加投标评估会，BC类不涉及外采的<span style="color: #000000;"><strong>刘椰韵</strong></span>参加，SM的<span style="color: #000000;"><strong>钟晓华</strong></span>，其他情况<strong><span style="color: #000000;">戴亮</span></strong>参加。</span></div>
 </div>
 <div>&nbsp;</div>
 <div>&nbsp;&nbsp;</div>
@@ -720,7 +741,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <div id="Index_JD_maintenanceAssessment">
 <div><strong>运维服务评估意见：</strong></div>
 <div>&nbsp;</div>
-<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请运营管理部参会，会上评估后给出结论<br />A角：熊经理 B角：蒋经理</span></div>
+<div style="margin-left: 40px;"><span style="color: #ff0000;">&bull; 邀请运营管理部参会，会上评估后给出结论<br />A角：熊俊伟 B角：蒋朝豪</span></div>
 </div>
 <div>&nbsp;&nbsp;
 <div id="Index_JD_testingRequirements">
@@ -770,6 +791,9 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 <div>&nbsp;</div>
 </div>
+</div>
+
+
 <div style="margin-left: 40px;">集成项目涉及代收代付业务的项目流程建议：<br />
 1、项目招标前，建议项目组尽力引导客户非公司许可类经营业务范围内业务（主要指基础电信业务）在招标文件中写明采用代收代付模式。<br />
 2、销售经理获取招标文件后，项目组需仔细阅读标书，识别非公司许可类经营业务范围内业务（主要指基础电信业务），并积极主动与招标方或直接客户沟通，确认客户是否可接受采用代收代付模式投标。<br />
@@ -778,7 +802,6 @@ document.addEventListener('DOMContentLoaded', function() {
 5、项目中标后，需要在项目交底会会议纪要上明确采用代收代付模式；同时，在前向合同签约时明确写明：公司作为电信业务代理方，为客户代购电信业务的条款。及基于电信代理的性质，由电信服务商直接向客户开具相应电信服务的发票。前向合同由我司与客户直接签约。<br />
 6、综上所述，基于项目合同已约定要求电信服务商直接向客户开具发票，在流程上，公司不产生开票和列账。基础电信业务类型的代收代付实际不涉及收入和成本，可视为无收支合同。故代收代付模式付款时，建议采用三方或两方协议方式（亿迅-电信方-客户/亿迅-电信）（无收支合同）的方式，发起合同审批时，请业务部门在审批流程里加签市场部审批；在报账付款时，将合同或合同关键页作为附件发起报账付款流程。<br />
 7、其他特殊情况建议一项目一议。</div>
-</div>
 <div>&nbsp;</div>
 <div>&nbsp;</div>
 <div>&nbsp;</div>
@@ -918,7 +941,9 @@ document.addEventListener('DOMContentLoaded', function() {
         attendeesForm: document.querySelector('#attendees-modal .attendees-form'),
         attendeesOutput: document.getElementById('attendees-output'),
 
-
+        emailModal: document.getElementById('email-modal'),
+        emailChecklist: document.getElementById('email-checklist'),
+        emailOutput: document.getElementById('email-output'),
     };
 
     // ======================= INITIALIZATION =======================
@@ -1517,6 +1542,117 @@ document.addEventListener('DOMContentLoaded', function() {
     DOMElements.attendeesForm.addEventListener('change', updateAttendeesList);
     DOMElements.attendeesForm.addEventListener('input', updateAttendeesList);
 
+    // --- Email Modal Logic ---
+    document.getElementById('btn-email').addEventListener('click', () => {
+        repopulateEmailDepartments();
+        DOMElements.emailModal.style.display = 'flex';
+    });
+    document.getElementById('close-email-modal').addEventListener('click', () => DOMElements.emailModal.style.display = 'none');
+    
+    const repopulateEmailDepartments = () => {
+        DOMElements.emailChecklist.innerHTML = '';
+        let depts = new Set();
+        const tjsText = DOMElements.ironTriangleInput.value;
+        const salesMatch = tjsText.match(/销售经理：\n.+?\((.+?)\)/s);
+        if (salesMatch && EMAIL_DATA[salesMatch[1].trim()]) {
+            depts.add(salesMatch[1].trim());
+        }
+        
+        const tableRows = DOMElements.deliveryDetailsTable.querySelectorAll('tbody tr');
+        tableRows.forEach(row => {
+            const dept = row.querySelector('select').value;
+            if (dept) depts.add(dept);
+        });
+
+        if (depts.size === 0) { // Add a blank dynamic row if no depts found
+            addEmailDeptRow(true);
+        } else {
+            depts.forEach(dept => addEmailDeptRow(false, dept, true));
+        }
+        updateEmailList();
+    };
+
+    const addEmailDeptRow = (isDynamic = false, deptName = "", isChecked = false) => {
+        const rowWidget = document.createElement('div');
+        rowWidget.className = 'checklist-row';
+        
+        let control;
+        if (isDynamic) {
+            control = document.createElement('select');
+            control.innerHTML = [''].concat(Object.keys(EMAIL_DATA)).map(d => `<option value="${d}">${d}</option>`).join('');
+            control.value = deptName;
+            control.addEventListener('change', updateEmailList);
+        } else {
+            control = document.createElement('input');
+            control.type = 'checkbox';
+            control.id = `email-check-${deptName}`;
+            control.checked = isChecked;
+            control.dataset.dept = deptName;
+            control.addEventListener('change', updateEmailList);
+            const label = document.createElement('label');
+            label.htmlFor = control.id;
+            label.textContent = deptName;
+            control = [control, label];
+        }
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'btn-remove'; // <-- 添加了这一行
+        removeBtn.textContent = '移除';
+        removeBtn.onclick = () => {
+            rowWidget.remove();
+            updateEmailList();
+        };
+
+        if (Array.isArray(control)) {
+             rowWidget.append(...control);
+        } else {
+             rowWidget.appendChild(control);
+        }
+        rowWidget.appendChild(removeBtn);
+        DOMElements.emailChecklist.appendChild(rowWidget);
+    };
+    
+    const updateEmailList = () => {
+        let leaders = [], managers = [], seenEmails = new Set();
+        const rows = DOMElements.emailChecklist.querySelectorAll('.checklist-row');
+        
+        const getDeptFromRow = row => {
+            const chk = row.querySelector('input[type="checkbox"]');
+            if (chk && chk.checked) return chk.dataset.dept;
+            const sel = row.querySelector('select');
+            if (sel && sel.value) return sel.value;
+            return null;
+        };
+
+        rows.forEach(row => {
+            const dept = getDeptFromRow(row);
+            if (dept && EMAIL_DATA[dept]) {
+                const [name, email] = EMAIL_DATA[dept].leader;
+                if (email && !seenEmails.has(email)) {
+                    leaders.push(`${name} <${email}>`);
+                    seenEmails.add(email);
+                }
+            }
+        });
+        rows.forEach(row => {
+            const dept = getDeptFromRow(row);
+            if (dept && EMAIL_DATA[dept]) {
+                const [name, email] = EMAIL_DATA[dept].manager;
+                if (email && !seenEmails.has(email)) {
+                    managers.push(`${name} <${email}>`);
+                    seenEmails.add(email);
+                }
+            }
+        });
+        
+        let finalText = leaders.join('； ');
+        if (leaders.length > 0 && managers.length > 0) finalText += '；\n';
+        finalText += managers.join('； ');
+        DOMElements.emailOutput.value = finalText;
+    };
+    
+    document.getElementById('email-add-btn').addEventListener('click', () => addEmailDeptRow(true));
+    document.getElementById('email-refresh-btn').addEventListener('click', repopulateEmailDepartments);
 
     // ======================= IMPORT/EXPORT LOGIC =======================
     
@@ -1580,7 +1716,4 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
 }); // End of DOMContentLoaded
-
-
