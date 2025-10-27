@@ -941,9 +941,9 @@ document.addEventListener('DOMContentLoaded', function() {
         attendeesForm: document.querySelector('#attendees-modal .attendees-form'),
         attendeesOutput: document.getElementById('attendees-output'),
 
-        emailModal: document.getElementById('email-modal'),
-        emailChecklist: document.getElementById('email-checklist'),
-        emailOutput: document.getElementById('email-output'),
+        //emailModal: document.getElementById('email-modal'),
+        //emailChecklist: document.getElementById('email-checklist'),
+        //emailOutput: document.getElementById('email-output'),
     };
 
     // ======================= INITIALIZATION =======================
@@ -1567,117 +1567,117 @@ document.addEventListener('DOMContentLoaded', function() {
     DOMElements.attendeesForm.addEventListener('change', updateAttendeesList);
     DOMElements.attendeesForm.addEventListener('input', updateAttendeesList);
 
-    // --- Email Modal Logic ---
-    document.getElementById('btn-email').addEventListener('click', () => {
-        repopulateEmailDepartments();
-        DOMElements.emailModal.style.display = 'flex';
-    });
-    document.getElementById('close-email-modal').addEventListener('click', () => DOMElements.emailModal.style.display = 'none');
+    // // --- Email Modal Logic ---
+    // document.getElementById('btn-email').addEventListener('click', () => {
+    //     repopulateEmailDepartments();
+    //     DOMElements.emailModal.style.display = 'flex';
+    // });
+    // document.getElementById('close-email-modal').addEventListener('click', () => DOMElements.emailModal.style.display = 'none');
     
-    const repopulateEmailDepartments = () => {
-        DOMElements.emailChecklist.innerHTML = '';
-        let depts = new Set();
-        const tjsText = DOMElements.ironTriangleInput.value;
-        const salesMatch = tjsText.match(/销售经理：\n.+?\((.+?)\)/s);
-        if (salesMatch && EMAIL_DATA[salesMatch[1].trim()]) {
-            depts.add(salesMatch[1].trim());
-        }
+    // const repopulateEmailDepartments = () => {
+    //     DOMElements.emailChecklist.innerHTML = '';
+    //     let depts = new Set();
+    //     const tjsText = DOMElements.ironTriangleInput.value;
+    //     const salesMatch = tjsText.match(/销售经理：\n.+?\((.+?)\)/s);
+    //     if (salesMatch && EMAIL_DATA[salesMatch[1].trim()]) {
+    //         depts.add(salesMatch[1].trim());
+    //     }
         
-        const tableRows = DOMElements.deliveryDetailsTable.querySelectorAll('tbody tr');
-        tableRows.forEach(row => {
-            const dept = row.querySelector('select').value;
-            if (dept) depts.add(dept);
-        });
+    //     const tableRows = DOMElements.deliveryDetailsTable.querySelectorAll('tbody tr');
+    //     tableRows.forEach(row => {
+    //         const dept = row.querySelector('select').value;
+    //         if (dept) depts.add(dept);
+    //     });
 
-        if (depts.size === 0) { // Add a blank dynamic row if no depts found
-            addEmailDeptRow(true);
-        } else {
-            depts.forEach(dept => addEmailDeptRow(false, dept, true));
-        }
-        updateEmailList();
-    };
+    //     if (depts.size === 0) { // Add a blank dynamic row if no depts found
+    //         addEmailDeptRow(true);
+    //     } else {
+    //         depts.forEach(dept => addEmailDeptRow(false, dept, true));
+    //     }
+    //     updateEmailList();
+    // };
 
-    const addEmailDeptRow = (isDynamic = false, deptName = "", isChecked = false) => {
-        const rowWidget = document.createElement('div');
-        rowWidget.className = 'checklist-row';
+    // const addEmailDeptRow = (isDynamic = false, deptName = "", isChecked = false) => {
+    //     const rowWidget = document.createElement('div');
+    //     rowWidget.className = 'checklist-row';
         
-        let control;
-        if (isDynamic) {
-            control = document.createElement('select');
-            control.innerHTML = [''].concat(Object.keys(EMAIL_DATA)).map(d => `<option value="${d}">${d}</option>`).join('');
-            control.value = deptName;
-            control.addEventListener('change', updateEmailList);
-        } else {
-            control = document.createElement('input');
-            control.type = 'checkbox';
-            control.id = `email-check-${deptName}`;
-            control.checked = isChecked;
-            control.dataset.dept = deptName;
-            control.addEventListener('change', updateEmailList);
-            const label = document.createElement('label');
-            label.htmlFor = control.id;
-            label.textContent = deptName;
-            control = [control, label];
-        }
+    //     let control;
+    //     if (isDynamic) {
+    //         control = document.createElement('select');
+    //         control.innerHTML = [''].concat(Object.keys(EMAIL_DATA)).map(d => `<option value="${d}">${d}</option>`).join('');
+    //         control.value = deptName;
+    //         control.addEventListener('change', updateEmailList);
+    //     } else {
+    //         control = document.createElement('input');
+    //         control.type = 'checkbox';
+    //         control.id = `email-check-${deptName}`;
+    //         control.checked = isChecked;
+    //         control.dataset.dept = deptName;
+    //         control.addEventListener('change', updateEmailList);
+    //         const label = document.createElement('label');
+    //         label.htmlFor = control.id;
+    //         label.textContent = deptName;
+    //         control = [control, label];
+    //     }
 
-        const removeBtn = document.createElement('button');
-        removeBtn.className = 'btn-remove'; // <-- 添加了这一行
-        removeBtn.textContent = '移除';
-        removeBtn.onclick = () => {
-            rowWidget.remove();
-            updateEmailList();
-        };
+    //     const removeBtn = document.createElement('button');
+    //     removeBtn.className = 'btn-remove'; // <-- 添加了这一行
+    //     removeBtn.textContent = '移除';
+    //     removeBtn.onclick = () => {
+    //         rowWidget.remove();
+    //         updateEmailList();
+    //     };
 
-        if (Array.isArray(control)) {
-             rowWidget.append(...control);
-        } else {
-             rowWidget.appendChild(control);
-        }
-        rowWidget.appendChild(removeBtn);
-        DOMElements.emailChecklist.appendChild(rowWidget);
-    };
+    //     if (Array.isArray(control)) {
+    //          rowWidget.append(...control);
+    //     } else {
+    //          rowWidget.appendChild(control);
+    //     }
+    //     rowWidget.appendChild(removeBtn);
+    //     DOMElements.emailChecklist.appendChild(rowWidget);
+    // };
     
-    const updateEmailList = () => {
-        let leaders = [], managers = [], seenEmails = new Set();
-        const rows = DOMElements.emailChecklist.querySelectorAll('.checklist-row');
+    // const updateEmailList = () => {
+    //     let leaders = [], managers = [], seenEmails = new Set();
+    //     const rows = DOMElements.emailChecklist.querySelectorAll('.checklist-row');
         
-        const getDeptFromRow = row => {
-            const chk = row.querySelector('input[type="checkbox"]');
-            if (chk && chk.checked) return chk.dataset.dept;
-            const sel = row.querySelector('select');
-            if (sel && sel.value) return sel.value;
-            return null;
-        };
+    //     const getDeptFromRow = row => {
+    //         const chk = row.querySelector('input[type="checkbox"]');
+    //         if (chk && chk.checked) return chk.dataset.dept;
+    //         const sel = row.querySelector('select');
+    //         if (sel && sel.value) return sel.value;
+    //         return null;
+    //     };
 
-        rows.forEach(row => {
-            const dept = getDeptFromRow(row);
-            if (dept && EMAIL_DATA[dept]) {
-                const [name, email] = EMAIL_DATA[dept].leader;
-                if (email && !seenEmails.has(email)) {
-                    leaders.push(`${name} <${email}>`);
-                    seenEmails.add(email);
-                }
-            }
-        });
-        rows.forEach(row => {
-            const dept = getDeptFromRow(row);
-            if (dept && EMAIL_DATA[dept]) {
-                const [name, email] = EMAIL_DATA[dept].manager;
-                if (email && !seenEmails.has(email)) {
-                    managers.push(`${name} <${email}>`);
-                    seenEmails.add(email);
-                }
-            }
-        });
+    //     rows.forEach(row => {
+    //         const dept = getDeptFromRow(row);
+    //         if (dept && EMAIL_DATA[dept]) {
+    //             const [name, email] = EMAIL_DATA[dept].leader;
+    //             if (email && !seenEmails.has(email)) {
+    //                 leaders.push(`${name} <${email}>`);
+    //                 seenEmails.add(email);
+    //             }
+    //         }
+    //     });
+    //     rows.forEach(row => {
+    //         const dept = getDeptFromRow(row);
+    //         if (dept && EMAIL_DATA[dept]) {
+    //             const [name, email] = EMAIL_DATA[dept].manager;
+    //             if (email && !seenEmails.has(email)) {
+    //                 managers.push(`${name} <${email}>`);
+    //                 seenEmails.add(email);
+    //             }
+    //         }
+    //     });
         
-        let finalText = leaders.join('； ');
-        if (leaders.length > 0 && managers.length > 0) finalText += '；\n';
-        finalText += managers.join('； ');
-        DOMElements.emailOutput.value = finalText;
-    };
+    //     let finalText = leaders.join('； ');
+    //     if (leaders.length > 0 && managers.length > 0) finalText += '；\n';
+    //     finalText += managers.join('； ');
+    //     DOMElements.emailOutput.value = finalText;
+    // };
     
-    document.getElementById('email-add-btn').addEventListener('click', () => addEmailDeptRow(true));
-    document.getElementById('email-refresh-btn').addEventListener('click', repopulateEmailDepartments);
+    // document.getElementById('email-add-btn').addEventListener('click', () => addEmailDeptRow(true));
+    // document.getElementById('email-refresh-btn').addEventListener('click', repopulateEmailDepartments);
 
     // ======================= IMPORT/EXPORT LOGIC =======================
     
@@ -1742,4 +1742,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 }); // End of DOMContentLoaded
+
 
