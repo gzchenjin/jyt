@@ -1304,7 +1304,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const key1_text = `本项目为${TB_businessType}项目，项目签约客户是${clientDescription}客户计划采用${bid_method_desc}。`;
         const key2_text = `项目建设内容为：${constructionContent}。由${temp.lead_department}牵头，${temp.assist_departments_summary}${temp.tjs_summary}${temp.delivery_summary}`;
-        const key3_text = `本项目预算${temp.budget_in_wan.toFixed(2)}万元（含税），属于${capacityType}${projectLevel}项目，${procurement_text}毛利率预估${_safeFloat(temp.TB_grossMargin).toFixed(2)}%（含税）`;
+        const key3_text = `本项目预算${temp.budget_in_wan.toFixed(2)}万元（含税），属于${capacityType}${projectLevel}项目，${procurement_text}毛利率预估${_safeFloat(temp.TB_grossMargin).toFixed(2)}%（不含税）。`;
         const key4_text = `本项目交付要求：交付周期为${TB_deliveryPeriod}，${TB_deliveryRisk}`;
 
         let output = `${projectName}(${businessCode})\n\n投标评估会\n一、项目基本信息\n1、${key1_text}\n2、${key2_text}\n3、${key3_text}\n二、风险及应对措施\n`;
@@ -1375,7 +1375,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })(temp.JD_biddingMethod);
         // ======================================================================
 
-        const procurement_text = temp.procurement === '是' ? `涉及外采，外采预算${temp.procurement_in_wan.toFixed(2)}万元（含税），外采占比${temp.procurement_ratio.toLocaleString(undefined, {style: 'percent', minimumFractionDigits: 2})}，`
+        const procurement_text = temp.procurement === '是' ? `涉及外采，外采预算${temp.procurement_in_wan.toFixed(2)}万元（含税），外采占比${temp.procurement_ratio.toLocaleString(undefined, {style: 'percent', minimumFractionDigits: 2})}。`
             : temp.procurement === '否' ? '不涉及外采。' : '【请选择是否后向外采】，';
             
         const procurementRisk = temp.procurement === '是' ? getVal('procurementRisk', "【请补充外采风险】")
@@ -1742,5 +1742,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 }); // End of DOMContentLoaded
+
 
 
