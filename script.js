@@ -1211,7 +1211,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const OT_risk = getVal('OT_risk');
         
         const clientDescription = !temp.contractClient  ? "【请补充签约客户】"
-          : `项目签约客户是${temp.contractClient}` 
+          : `${temp.contractClient}` 
           + ((!temp.endClient || temp.endClient === temp.contractClient) ? '。'
           : `，最终客户是${temp.endClient}。`);
 
@@ -1273,7 +1273,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const TB_biddingRisk = getVal('TB_biddingRisk', "【请补充招投标风险评估】");
 
         const clientDescription = !temp.contractClient  ? "【请补充签约客户】"
-          : `项目签约客户是${temp.contractClient}` 
+          : `${temp.contractClient}` 
           + ((!temp.endClient || temp.endClient === temp.contractClient) ? '。'
           : `，最终客户是${temp.endClient}。`);
         
@@ -1343,7 +1343,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const OT_risk = getVal('OT_risk');
 
         const clientDescription = !temp.contractClient  ? "【请补充签约客户】"
-          : `项目签约客户是${temp.contractClient}` 
+          : `${temp.contractClient}` 
           + ((!temp.endClient || temp.endClient === temp.contractClient) ? '。'
           : `，最终客户是${temp.endClient}。`);
 
@@ -1752,6 +1752,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 }); // End of DOMContentLoaded
+
 
 
 
