@@ -87,18 +87,24 @@ body {
     gap: 25px;
 }
 
-/* --- 4. 按钮栏 --- */
+
+/* --- 4. 按钮栏 (修改：增加吸附固定效果) --- */
 .top-bar {
     grid-column: 1 / -1;
-    background-color: var(--card-bg);
+    background-color: var(--card-bg); /* 必须有背景色，否则内容会透出来 */
     padding: 15px 20px;
     border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     align-items: center;
     margin-bottom: 10px;
+
+    /* --- 新增核心代码 --- */
+    position: sticky;       /* 启用吸附定位 */
+    top: var(--header-height); /* 距离顶部 64px (刚好在蓝色导航栏下方) */
+    z-index: 90;            /* 层级：高于表单内容，低于蓝色导航栏 */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05); /* 增加阴影，产生悬浮感 */
 }
 .spacer { flex-grow: 1; }
 
@@ -257,8 +263,12 @@ input:disabled, select:disabled, textarea:disabled {
 /* --- 8. 右侧帮助面板 --- */
 .right-panel {
     position: sticky;
-    top: 80px;
-    height: calc(100vh - 100px);
+    
+    /* 【修改点】原来是 80px，现在改为 140px */
+    /* 计算逻辑：导航栏(64px) + 操作栏(约60px) + 间距(16px) = 140px */
+    top: 140px; 
+    
+    height: calc(100vh - 160px); /* 同时调整高度，防止底部溢出 */
     background: white;
     border: 1px solid var(--border-color);
     border-radius: 4px;
