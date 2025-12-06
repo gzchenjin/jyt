@@ -1001,6 +1001,24 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     }
+    
+    // ======================= 3. 修复“返回目录”按钮导致左侧跳动 =======================
+    const backToTocBtn = document.querySelector('.help-title-button');
+    
+    if (backToTocBtn) {
+        backToTocBtn.addEventListener('click', function(e) {
+            e.preventDefault(); // 1. 踩刹车：阻止浏览器默认的整页滚动
+            
+            // 2. 手动让右侧帮助容器滚动到最顶部 (0的位置)
+            const container = document.querySelector('.help-content');
+            if (container) {
+                container.scrollTo({
+                    top: 0, 
+                    behavior: 'smooth'
+                });
+            }
+        });
+    }
 
 }); // End of DOMContentLoaded
 
@@ -1039,4 +1057,5 @@ async function saveDataToBackend(data) {
         //alert('无法连接到后端服务器，请检查服务器是否正在运行且防火墙已配置。'); // 弹出连接错误提示
     }
 }
+
 
