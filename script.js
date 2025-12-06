@@ -31,17 +31,45 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('help-content.html')
             .then(response => {
                 if (!response.ok) throw new Error(response.statusText);
-                return response.text(); // 注意：这里是 .text() 不是 .json()
+                return response.text();
             })
             .then(html => {
                 // 1. 注入 HTML
                 helpContainer.innerHTML = html;
                 
                 // 2. 重新渲染数学公式 (MathJax)
-                // 因为 HTML 是动态插入的，必须手动通知 MathJax 重新渲染
-                if (window.MathJax) {
-                    MathJax.typesetPromise([helpContainer]);
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    MathJax.typesetPromise([helpContainer]).catch(err => console.log('MathJax渲染错误: ' + err.message));
                 }
+
+                // ============================================================
+                // 【新增功能】修复目录点击导致整个页面滚动的问题
+                // ============================================================
+                // 选取帮助文档内所有以 # 开头的链接（即目录锚点）
+                const tocLinks = helpContainer.querySelectorAll('a[href^="#"]');
+                
+                tocLinks.forEach(link => {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault(); // 1. 阻止浏览器默认的“整页跳转”行为
+                        
+                        // 获取目标元素的 ID (去掉 # 号)
+                        const targetId = this.getAttribute('href').substring(1); 
+                        const targetElement = document.getElementById(targetId);
+                        
+                        if (targetElement) {
+                            // 2. 计算目标元素相对于 helpContainer 顶部的距离
+                            // offsetTop 是元素相对于父定位元素的距离
+                            const targetPosition = targetElement.offsetTop;
+                            
+                            // 3. 只滚动 helpContainer 容器内部，而不是整个 window
+                            helpContainer.scrollTo({
+                                top: targetPosition - 20, // 减去 20px 留点呼吸空间，避免顶格太紧
+                                behavior: 'smooth'        // 平滑滚动效果
+                            });
+                        }
+                    });
+                });
+                // ============================================================
             })
             .catch(err => {
                 console.error("帮助文档加载失败:", err);
@@ -1011,3 +1039,4 @@ async function saveDataToBackend(data) {
         //alert('无法连接到后端服务器，请检查服务器是否正在运行且防火墙已配置。'); // 弹出连接错误提示
     }
 }
+
