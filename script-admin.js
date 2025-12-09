@@ -42,12 +42,21 @@ document.addEventListener('DOMContentLoaded', () => {
         await loadRecords(1);
     });
 
+
+    const searchProjectInput = document.getElementById('search-project');
+    const searchCodeInput = document.getElementById('search-code');
+
+
     // 2. 核心功能：加载数据
     async function loadRecords(page = 1) {
         errorMsg.textContent = '';
         const perPage = parseInt(perPageSelect.value, 10);
         const startDate = startDateInput.value || null;
         const endDate = endDateInput.value || null;
+
+        // 【新增】分别获取两个搜索框的值
+        const searchProject = searchProjectInput.value.trim() || null;
+        const searchCode = searchCodeInput.value.trim() || null;
 
         try {
             // 【已修改】使用绝对路径
@@ -60,7 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     page: page,
                     per_page: perPage,
                     start_date: startDate,
-                    end_date: endDate
+                    end_date: endDate,
+                    
+                    // 【新增】发送两个独立的参数
+                    search_project: searchProject, 
+                    search_code: searchCode
                 })
             });
 
@@ -86,6 +99,16 @@ document.addEventListener('DOMContentLoaded', () => {
             errorMsg.textContent = `请求出错: ${e.message}`;
         }
     }
+
+    // 【新增】监听搜索框的清空事件 (点击 X 时触发)
+    // 当用户点击 X 清空内容时，自动重新加载全部数据
+    [searchProjectInput, searchCodeInput].forEach(input => {
+        input.addEventListener('search', () => {
+            if (input.value === '') {
+                loadRecords(1); // 如果内容被清空了，自动刷新表格
+            }
+        });
+    });
 
     // 3. 填充表格函数
     function populateTable(records) {
