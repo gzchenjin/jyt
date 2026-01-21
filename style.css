@@ -133,6 +133,9 @@ body {
 .btn-info { background-color: white; border: 1px solid var(--border-color); color: var(--text-main); }
 .btn-info:hover { background-color: #f8f9fa; border-color: #dce0e5; }
 
+.btn-paste { background-color: #e2e6ea; color: var(--text-main); }
+.btn-paste:hover { background-color: #dbe0e5; }
+
 .btn-io { background-color: #e2e6ea; color: var(--text-main); }
 .btn-io:hover { background-color: #dbe0e5; }
 
