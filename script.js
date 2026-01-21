@@ -801,25 +801,63 @@ document.addEventListener('DOMContentLoaded', function() {
     const repopulateEmailDepartments = () => {
         DOMElements.emailChecklist.innerHTML = '';
         let depts = new Set();
+        
+        // --- 1. 获取铁三角文本 ---
         const tjsText = DOMElements.ironTriangleInput.value;
-        const salesMatch = tjsText.match(/销售经理：\n.+?\((.+?)\)/s);
-        if (salesMatch && EMAIL_DATA[salesMatch[1].trim()]) {
-            depts.add(salesMatch[1].trim());
+        console.log("正在分析铁三角文本...");
+
+        // ============================================================
+        // [核心修复] 超强容错正则
+        // 解释：
+        // 1. 销售经理     -> 锚点
+        // 2. [:：]       -> 兼容 中文冒号 或 英文冒号
+        // 3. \s* -> 兼容 任意数量的换行、空格、制表符
+        // 4. [^(\（]*?    -> 非贪婪匹配，跳过人名 (直到遇到左括号为止)
+        // 5. [(\（]      -> 兼容 中文左括号（ 或 英文左括号 (
+        // 6. (.+?)       -> 【捕获目标】部门名称
+        // 7. [)\）]      -> 兼容 中文右括号） 或 英文右括号 )
+        // ============================================================
+        const salesRegex = /销售经理[:：]\s*[^(\（]*?[(\（](.+?)[)\）]/;
+        const salesMatch = tjsText.match(salesRegex);
+
+        if (salesMatch) {
+            const deptName = salesMatch[1].trim();
+            console.log("✅ 成功抓取销售部门:", deptName);
+            
+            // 只要抓到了就添加，不管 EMAIL_DATA 里有没有配置
+            // 这样你至少能在界面上看到它，知道抓取成功了
+            if (deptName) {
+                depts.add(deptName);
+                
+                // 仅在控制台提示配置缺失，不阻断流程
+                if (!window.EMAIL_DATA || !window.EMAIL_DATA[deptName]) {
+                    console.warn(`⚠️ 提示: 抓取到 "${deptName}"，但 EMAIL_DATA 中未配置对应的邮件接收人。`);
+                }
+            }
+        } else {
+            console.warn("❌ 未匹配到销售经理的部门信息，请检查铁三角文本格式。");
         }
         
+        // --- 2. 获取交付列表中的部门 ---
         const tableRows = DOMElements.deliveryDetailsTable.querySelectorAll('tbody tr');
         tableRows.forEach(row => {
-            const dept = row.querySelector('select').value;
-            if (dept) depts.add(dept);
+            const select = row.querySelector('select'); 
+            if (select) {
+                const dept = select.value;
+                if (dept) depts.add(dept);
+            }
         });
 
-        if (depts.size === 0) { // Add a blank dynamic row if no depts found
+        // --- 3. 生成界面 ---
+        if (depts.size === 0) { 
             addEmailDeptRow(true);
         } else {
             depts.forEach(dept => addEmailDeptRow(false, dept, true));
         }
+        
         updateEmailList();
     };
+
 
     const addEmailDeptRow = (isDynamic = false, deptName = "", isChecked = false) => {
         const rowWidget = document.createElement('div');
@@ -1020,7 +1058,351 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-}); // End of DOMContentLoaded
+
+
+
+
+
+
+
+
+
+
+    
+/////////////////////////////////////////////////////////////////////////////////////
+    // ======================= 免填写粘贴 =======================
+    // 绑定按钮事件
+    const pasteBtn = document.getElementById('btn-smart-paste');
+        if (pasteBtn) {
+            pasteBtn.addEventListener('click', handleSmartPaste);
+        }
+    });
+
+    // ======================= 终极修正版 (修复布局错乱 + 数据清洗) =======================
+    async function handleSmartPaste() {
+        try {
+            let text = '';
+            // 1. 尝试自动读取
+            if (navigator.clipboard && navigator.clipboard.readText) {
+                try {
+                    text = await navigator.clipboard.readText();
+                } catch (e) { console.warn('自动读取受限'); }
+            }
+            
+            // 2. 兜底：手动粘贴
+            if (!text || !text.trim()) {
+                const manualText = prompt("⚠️ 无法自动读取。\n请在此框中按下 Ctrl+V 粘贴内容，然后点击确定：");
+                if (manualText) text = manualText;
+            }
+
+            if (!text || !text.trim()) return;
+
+            // 3. 解析数据
+            const data = parseVerticalData(text);
+            console.log("解析结果:", data); 
+
+            let count = 0;
+
+            // --- A. 基础字段 ---
+            count += setInputValue('projectName', data.projectName);
+            
+            // [清洗] 商机编号：去掉混在后面的“合同编号”
+            if (data.businessCode) {
+                let cleanCode = data.businessCode.split(/[\s\t\n]+|合同编号|项目类型/)[0];
+                count += setInputValue('businessCode', cleanCode);
+            }
+
+            count += setInputValue('contractClient', data.client);
+            count += setInputValue('constructionContent', data.content);
+            
+            // --- B. 预算金额 ---
+            if (data.budget) {
+                const match = data.budget.match(/[\d,]+(\.\d+)?/);
+                if (match) {
+                    const money = match[0].replace(/,/g, '');
+                    count += setInputValue('budgetAmount', money);
+                }
+            }
+
+            // --- C. 下拉框 ---
+            count += setSelectValue('projectLevel', data.level);
+            count += setSelectValue('capacityType', data.capacityType);
+            
+            // --- D. 外采联动 (核心修复：布局显示) ---
+            if (data.extBudget) {
+                const match = data.extBudget.match(/[\d,]+(\.\d+)?/);
+                if (match) {
+                    let extMoney = parseFloat(match[0].replace(/,/g, ''));
+                    if (extMoney > 0) {
+                        count += setSelectValue('procurement', '是');
+                        const procInput = document.getElementById('procurementAmount');
+                        const coreSelect = document.getElementById('coreCapability');
+                        
+                        if (procInput) procInput.disabled = false; 
+                        if (coreSelect) coreSelect.disabled = false;
+                        
+                        count += setInputValue('procurementAmount', extMoney);
+                        
+                        // [修复] 填入外采风险并正确显示行
+                        if (data.procurementSituation) {
+                            const riskRow = document.getElementById('procurementRiskRow');
+                            if (riskRow) {
+                                // !!! 关键修复 !!!
+                                // 不要用 'block'，用空字符串 ''，让 CSS 恢复原本的 display: flex
+                                riskRow.style.display = ''; 
+                            }
+                            count += setInputValue('procurementRisk', data.procurementSituation);
+                        }
+                    } else {
+                        setSelectValue('procurement', '否');
+                    }
+                }
+            } else if (data.procurement) {
+                count += setSelectValue('procurement', data.procurement);
+            }
+
+            // --- E. 毛利率/净利率 ---
+            if (data.grossMargin) {
+                const match = data.grossMargin.match(/-?\d+(\.\d+)?/);
+                if (match) {
+                    count += setInputValue('SJ_grossMargin', match[0]);
+                    count += setInputValue('TB_grossMargin', match[0]);
+                }
+            }
+            if (data.netMargin) {
+                const match = data.netMargin.match(/-?\d+(\.\d+)?/);
+                if (match) count += setInputValue('SJ_netMargin', match[0]);
+            }
+            
+            // --- F. 其他字段 ---
+            if (data.biddingMethod) {
+                count += setSelectFuzzy('TB_biddingMethod', data.biddingMethod);
+                count += setSelectFuzzy('JD_biddingMethod', data.biddingMethod);
+            }
+            count += setSelectValue('TB_biddingEntity', data.biddingEntity);
+            if (data.businessType) {
+                count += setSelectValue('JD_businessType', data.businessType);
+                count += setSelectValue('TB_businessType', data.businessType);
+            }
+            if (data.duration) {
+                count += setInputValue('JD_deliveryPeriod', data.duration);
+                count += setInputValue('TB_deliveryPeriod', data.duration);
+            }
+
+            // --- G. 铁三角 ---
+            if (data.pm || data.sales || data.solution || data.delivery) {
+                const ironText = `项目经理：${data.pm || ''}\n销售经理：${data.sales || ''}\n方案经理：${data.solution || ''}\n交付经理：${data.delivery || ''}`;
+                const ironInput = document.getElementById('ironTriangleInput');
+                if (ironInput) {
+                    ironInput.value = ironText;
+                    highlightInput(ironInput);
+                    count++;
+                }
+            }
+
+            // 反馈
+            if (count > 0) {
+                const btn = document.getElementById('btn-smart-paste');
+                if (btn) {
+                    const originalText = btn.innerText;
+                    btn.innerText = `✅ 成功填充 ${count} 项`;
+                    btn.style.backgroundColor = '#28a745';
+                    setTimeout(() => {
+                        btn.innerText = originalText;
+                        btn.style.backgroundColor = '';
+                    }, 2000);
+                }
+            } else {
+                alert('未识别到有效数据，请检查复制内容。');
+            }
+
+        } catch (err) {
+            console.error('粘贴出错:', err);
+            alert('程序发生错误，请检查控制台。');
+        }
+    }
+
+    // --- 核心解析器 ---
+    function parseVerticalData(text) {
+        const result = {};
+        const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l);
+
+        const isKey = (str) => {
+            if (str.endsWith('：') || str.endsWith(':')) return true;
+            if (str === '请选择' || str.startsWith('请选择')) return true; 
+            
+            const keys = [
+                '项目预算', '项目名称', '商机编号', '合同编号', '基本信息', '会前信息', 
+                '会议内容记录', '问题及解决方案', '会议决议', '参会人员', '铁三角', 
+                '项目后向采购是否', // 关键截断点
+                '核心能力标签', '项目各板块需求', '项目实施可行性',
+                '技术要求', '总体方案', '招标文件', '运维服务要求', '应急方案', 
+                '是否包含监控', '请确认项目类型', '是否需要签订', '项目外采评估', 
+                '人工成本评估', '列收方式', '外采评估', '是否需要标前引入', 
+                '项目后向采购基本情况'
+            ];
+            return keys.some(k => str.startsWith(k));
+        };
+
+        const isMoneyLine = (str) => {
+            if (!/\d/.test(str)) return false; 
+            if (str.includes('结构') || str.includes('含税') || str.includes('不含税')) return false; 
+            if (str.includes('合同金额') && !/\d/.test(str.replace('合同金额',''))) return false; 
+            if ((str.match(/-/g)||[]).length >= 2 || (str.match(/\//g)||[]).length >= 2) return false;
+            return true;
+        };
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            
+            const getValue = () => {
+                const colParts = line.split(/[:：]/);
+                if (colParts.length > 1 && colParts[1].trim()) return colParts[1].trim();
+                if (i + 1 < lines.length) return lines[i+1];
+                return '';
+            };
+
+            // 1. 商机编号
+            if (line.includes('商机编号') && !line.includes('mss')) {
+                result.businessCode = getValue(); 
+            }
+
+            // 2. 项目预算
+            else if (line === '项目预算' || (line.includes('项目预算') && !line.includes('结构'))) {
+                const parts = line.split(/[:：]/);
+                if (parts.length > 1 && isMoneyLine(parts[1])) {
+                    result.budget = parts[1];
+                } else {
+                    for (let k = 1; k <= 5; k++) {
+                        if (i + k >= lines.length) break;
+                        const nextRow = lines[i + k];
+                        if (isKey(nextRow) && !nextRow.includes('合同金额') && !nextRow.includes('软件金额')) break;
+                        if (isMoneyLine(nextRow)) {
+                            result.budget = nextRow;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // 3. 毛利率/净利率
+            else if (line.includes('毛利率')) {
+                let match = line.match(/(-?\d+(\.\d+)?)%/);
+                result.grossMargin = match ? match[0] : getValue();
+            }
+            else if (line.includes('净利润率')) {
+                let match = line.match(/(-?\d+(\.\d+)?)%/);
+                result.netMargin = match ? match[0] : getValue();
+            }
+
+            // 4. 建设内容 (多行)
+            else if (line.startsWith('建设内容')) {
+                let contentArr = [];
+                const parts = line.split(/[:：]/);
+                if (parts.length > 1 && parts[1].trim()) contentArr.push(parts[1].trim());
+                let j = i + 1;
+                while (j < lines.length) {
+                    const nextRow = lines[j];
+                    if (nextRow.startsWith('项目预算') || (isKey(nextRow) && !/^\d+[、\.]/.test(nextRow))) break;
+                    contentArr.push(nextRow);
+                    j++;
+                }
+                result.content = contentArr.join('\n');
+                i = j - 1;
+            }
+
+            // 5. 外采风险 (多行 + 截断优化)
+            else if (line.startsWith('项目后向采购基本情况')) {
+                let contentArr = [];
+                const parts = line.split(/[:：]/);
+                if (parts.length > 1 && parts[1].trim()) contentArr.push(parts[1].trim());
+                let j = i + 1;
+                while (j < lines.length) {
+                    const nextRow = lines[j];
+                    // 停止条件：遇到Key就停
+                    if (isKey(nextRow) && !/^\d+[、\.]/.test(nextRow)) break;
+                    contentArr.push(nextRow);
+                    j++;
+                }
+                result.procurementSituation = contentArr.join('\n');
+                i = j - 1;
+            }
+
+            // 6. 外部采购预算
+            else if (line.includes('外部采购预算') || line.includes('外部采购金额')) {
+                for (let k = 1; k <= 3; k++) {
+                    if (i + k >= lines.length) break;
+                    const nextRow = lines[i + k];
+                    if (/\d/.test(nextRow) && !nextRow.includes('结构')) {
+                        result.extBudget = nextRow;
+                        break;
+                    }
+                }
+            }
+
+            // 7. 其他字段
+            else if (line.includes('项目名称') && !line.includes('ID')) result.projectName = getValue();
+            else if (line.startsWith('签约客户') || line.startsWith('客户名称')) result.client = getValue();
+            else if (line.startsWith('项目级别')) { const val = getValue(); if (val.length < 10) result.level = val; }
+            else if (line.includes('产品能力')) result.capacityType = getValue();
+            else if (line.includes('是否需要后向采购')) result.procurement = getValue();
+            else if (line.startsWith('业务类型')) result.businessType = getValue();
+            else if (line.startsWith('投标方式') || line.startsWith('签约类型')) result.biddingMethod = getValue();
+            else if (line.startsWith('投标主体')) result.biddingEntity = getValue();
+            else if (line.includes('项目工期') || line.includes('服务期')) result.duration = getValue();
+            else if (line.startsWith('项目经理')) result.pm = getValue();
+            else if (line.startsWith('销售经理')) result.sales = getValue();
+            else if (line.startsWith('方案经理') || line.startsWith('售前解方经理')) result.solution = getValue();
+            else if (line.startsWith('交付经理')) result.delivery = getValue();
+        }
+        return result;
+    }
+
+    // --- 辅助函数 (带事件触发) ---
+    function setInputValue(id, value) {
+        if (!value) return 0;
+        const el = document.getElementById(id);
+        if (el) {
+            el.value = value;
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+            highlightInput(el); return 1;
+        } return 0;
+    }
+    function setSelectValue(id, value) {
+        if (!value) return 0;
+        const el = document.getElementById(id);
+        if (el) {
+            for (let i = 0; i < el.options.length; i++) {
+                if (el.options[i].value === value || el.options[i].text === value) {
+                    el.selectedIndex = i;
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                    highlightInput(el); return 1;
+                }
+            }
+        } return 0;
+    }
+    function setSelectFuzzy(id, textToMatch) {
+        if (!textToMatch) return 0;
+        const el = document.getElementById(id);
+        if (el) {
+            for (let i = 0; i < el.options.length; i++) {
+                const optText = el.options[i].text;
+                if (optText && (textToMatch.includes(optText) || optText.includes(textToMatch))) {
+                    el.selectedIndex = i;
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                    highlightInput(el); return 1;
+                }
+            }
+        } return 0;
+    }
+    function highlightInput(element) {
+        element.style.transition = 'background-color 0.3s';
+        element.style.backgroundColor = '#d1e7dd';
+        setTimeout(() => { element.style.backgroundColor = ''; }, 800);
+    }
+
+; // End of DOMContentLoaded
 
 
 
@@ -1057,8 +1439,3 @@ async function saveDataToBackend(data) {
         //alert('无法连接到后端服务器，请检查服务器是否正在运行且防火墙已配置。'); // 弹出连接错误提示
     }
 }
-
-
-
-
-
