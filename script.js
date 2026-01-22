@@ -607,24 +607,50 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ======================= EVENT LISTENERS FOR BUTTONS =======================
     
+    // 1. 商机评估
     document.getElementById('btn-gen-opportunity').addEventListener('click', () => {
-        const formData = gatherFormData();
+        // --- 生成报告部分（保持原样，用原始数据）---
+        const formData = gatherFormData(); 
         const report = generateOpportunityMinutes(formData);
         showReportDialog("商机评估会纪要", report);
+
+        // --- 发送给服务器部分（修改这里）---
+        const data = gatherFormData();
+        
+        // 【核心修改】：直接修改项目名称，加上标记
+        // 假设您的表单里项目名称字段叫 project_name
+        data.projectName = data.projectName + "【商机】"; 
+        
+        saveDataToBackend(data); 
     });
 
+    // 2. 投标评估
     document.getElementById('btn-gen-bidding').addEventListener('click', () => {
         const formData = gatherFormData();
         const report = generateBiddingMinutes(formData);
         showReportDialog("投标评估会纪要", report);
+
+        const data = gatherFormData();
+        
+        // 【核心修改】
+        data.projectName = data.projectName + "【投标】"; 
+        
+        saveDataToBackend(data); 
     });
     
+    // 3. 项目交底
     document.getElementById('btn-gen-kickoff').addEventListener('click', () => {
         const formData = gatherFormData();
         const report = generateKickoffMinutes(formData);
         showReportDialog("项目交底会纪要", report);
-    });
 
+        const data = gatherFormData();
+        
+        // 【核心修改】
+        data.projectName = data.projectName + "【交底】"; 
+        
+        saveDataToBackend(data); 
+    });
 
     // ======================= MODAL/DIALOG HANDLING =======================
     
@@ -1073,12 +1099,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // ======================= 免填写粘贴 =======================
     // 绑定按钮事件
     const pasteBtn = document.getElementById('btn-smart-paste');
-    if (pasteBtn) {
-        pasteBtn.addEventListener('click', handleSmartPaste);
-    }
-});
-
-    // ======================= 最终稳健版 (修复预算漏抓 + 商机编码串标) =======================
+        if (pasteBtn) {
+            pasteBtn.addEventListener('click', handleSmartPaste);
+        }
+    });
+    
+    // ======================= 最终完美版 (修复项目名称串标) =======================
     async function handleSmartPaste() {
         try {
             let text = '';
@@ -1086,7 +1112,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 try { text = await navigator.clipboard.readText(); } catch (e) {}
             }
             if (!text || !text.trim()) {
-                const manualText = prompt("⚠️ 请在此框中按下 Ctrl+V 粘贴内容：");
+                const manualText = prompt("⚠️ 无法自动读取。\n请在此框中按下 Ctrl+V 粘贴内容：");
                 if (manualText) text = manualText;
             }
             if (!text || !text.trim()) return;
@@ -1100,7 +1126,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // --- A. 基础字段 ---
             count += setInputValue('projectName', data.projectName);
             
-            // [修复] 商机编码：遇到空格/换行/“合同”二字立即截断
+            // 商机编号清洗
             if (data.businessCode) {
                 let cleanCode = data.businessCode.split(/[\s\t\n]+|合同编号|项目类型/)[0];
                 count += setInputValue('businessCode', cleanCode);
@@ -1109,9 +1135,8 @@ document.addEventListener('DOMContentLoaded', function() {
             count += setInputValue('contractClient', data.client);
             count += setInputValue('constructionContent', data.content);
             
-            // --- B. [重点修复] 预算金额 ---
+            // --- B. 预算金额 ---
             if (data.budget) {
-                // 提取金额数字（支持逗号）
                 const match = data.budget.match(/[\d,]+(\.\d+)?/);
                 if (match) {
                     const money = match[0].replace(/,/g, '');
@@ -1123,7 +1148,7 @@ document.addEventListener('DOMContentLoaded', function() {
             count += setSelectValue('projectLevel', data.level);
             count += setSelectValue('capacityType', data.capacityType);
             
-            // --- D. 外采联动 (修复布局显示) ---
+            // --- D. 外采联动 ---
             if (data.extBudget) {
                 const match = data.extBudget.match(/[\d,]+(\.\d+)?/);
                 if (match) {
@@ -1138,8 +1163,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         if (data.procurementSituation) {
                             const riskRow = document.getElementById('procurementRiskRow');
-                            // 使用空字符串恢复默认 display (flex/block)
-                            if (riskRow) riskRow.style.display = ''; 
+                            if (riskRow) riskRow.style.display = ''; // 恢复布局
                             count += setInputValue('procurementRisk', data.procurementSituation);
                         }
                     } else {
@@ -1207,7 +1231,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         } catch (err) {
             console.error('粘贴出错:', err);
-            alert('程序错误，请查看控制台。');
+            alert('程序发生错误，请检查控制台。');
         }
     }
     
@@ -1234,7 +1258,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const isMoneyLine = (str) => {
             if (!/\d/.test(str)) return false; 
             if (str.includes('结构') || str.includes('含税') || str.includes('不含税')) return false; 
-            // 排除纯文字标签，但如果标签后跟着数字则保留
             if (str.includes('合同金额') && !/\d/.test(str.replace('合同金额',''))) return false; 
             if ((str.match(/-/g)||[]).length >= 2 || (str.match(/\//g)||[]).length >= 2) return false;
             return true;
@@ -1255,31 +1278,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 result.businessCode = getValue(); 
             }
         
-            // 2. [重点修复] 项目预算
-            // 必须以 "项目预算" 开头，防止匹配到 "项目级别...含税的项目预算" 这种描述文字
-            else if (line.startsWith('项目预算')) {
+            // 2. [修复] 项目名称 (处理 "项目名称：xxx 客户名称：yyy" 同行情况)
+            else if (line.includes('项目名称') && !line.includes('ID')) {
+                let val = getValue();
+                // 如果取到的值里包含了“客户名称”或“商机编号”，说明串行了，截断它
+                if (val) {
+                    val = val.split(/[\t\s]+客户名称|客户名称|[\t\s]+商机编号|商机编号/)[0].trim();
+                }
+                result.projectName = val;
+            }
+        
+            // 3. 项目预算
+            else if (line === '项目预算' || (line.includes('项目预算') && !line.includes('结构'))) {
                 const parts = line.split(/[:：]/);
-                // 2.1 先看当前行冒号后有没有钱
                 if (parts.length > 1 && isMoneyLine(parts[1])) {
                     result.budget = parts[1];
                 } else {
-                    // 2.2 否则往后找8行 (加大范围，跳过所有干扰)
                     for (let k = 1; k <= 8; k++) {
                         if (i + k >= lines.length) break;
                         const nextRow = lines[i + k];
-                        
-                        // 遇到明显的新大标题才停，但跳过 "合同金额" 这种伪标题
                         if (isKey(nextRow) && !nextRow.includes('合同金额') && !nextRow.includes('软件金额')) break;
-                        
                         if (isMoneyLine(nextRow)) {
                             result.budget = nextRow;
-                            break; 
+                            break;
                         }
                     }
                 }
             }
         
-            // 3. 毛利率/净利率
+            // 4. 毛利率/净利率
             else if (line.includes('毛利率')) {
                 let match = line.match(/(-?\d+(\.\d+)?)%/);
                 result.grossMargin = match ? match[0] : getValue();
@@ -1289,7 +1316,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 result.netMargin = match ? match[0] : getValue();
             }
         
-            // 4. 建设内容 (多行)
+            // 5. 建设内容 (多行)
             else if (line.startsWith('建设内容')) {
                 let contentArr = [];
                 const parts = line.split(/[:：]/);
@@ -1297,7 +1324,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 let j = i + 1;
                 while (j < lines.length) {
                     const nextRow = lines[j];
-                    // 停止条件：遇到 Key (且不以数字开头)
                     if (nextRow.startsWith('项目预算') || (isKey(nextRow) && !/^\d+[、\.]/.test(nextRow))) break;
                     contentArr.push(nextRow);
                     j++;
@@ -1306,7 +1332,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 i = j - 1;
             }
         
-            // 5. 外采风险 (多行 + 截断)
+            // 6. 外采风险 (多行)
             else if (line.startsWith('项目后向采购基本情况')) {
                 let contentArr = [];
                 const parts = line.split(/[:：]/);
@@ -1322,7 +1348,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 i = j - 1;
             }
         
-            // 6. 外部采购预算
+            // 7. 外部采购预算
             else if (line.includes('外部采购预算') || line.includes('外部采购金额')) {
                 for (let k = 1; k <= 3; k++) {
                     if (i + k >= lines.length) break;
@@ -1334,8 +1360,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         
-            // 7. 其他字段
-            else if (line.includes('项目名称') && !line.includes('ID')) result.projectName = getValue();
+            // 8. 其他字段
             else if (line.startsWith('签约客户') || line.startsWith('客户名称')) result.client = getValue();
             else if (line.startsWith('项目级别')) { const val = getValue(); if (val.length < 10) result.level = val; }
             else if (line.includes('产品能力')) result.capacityType = getValue();
