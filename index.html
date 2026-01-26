@@ -400,6 +400,21 @@ A角：熊俊伟 B角：蒋朝豪；"></textarea>
             <div class="attendees-form">
                  <div class="form-row"><label>会议类型</label><select id="attendees-meetingType"><option value=""></option><option>商机评估会</option><option>投标评估会</option><option>商机、投标评估会</option><option>项目交底会</option></select></div>
                  <div class="form-row"><label>项目级别</label><select id="attendees-projectLevel"><option value=""></option><option>A类</option><option>B类</option><option>C类</option></select></div>
+
+                <div class="form-row">
+                    <label>行业/电信-A类必选</label>
+                    <div style="display: flex; flex-direction: column; flex: 1;">
+                        <select id="attendees-industryType">
+                            <option value="" disabled selected></option>
+                            <option value="行业">行业</option>
+                            <option value="电信">电信</option>
+                        </select>
+                        <small style="color: #888; font-size: 12px; margin-top: 4px; line-height: 1.2;">
+                            * 行业域项目定义：最终客户为非电信
+                        </small>
+                    </div>
+                </div>
+
                  <div class="form-row"><label>项目预算(万元)</label><input type="text" id="attendees-budgetAmount"></div>
                  <div class="form-row"><label>项目合作/变更</label><select id="attendees-cooperation"><option value=""></option><option>是</option><option>否</option></select></div>
                  <div class="form-row"><label>涉及外采/变更</label><select id="attendees-procurement"><option value=""></option><option>是</option><option>否</option></select></div>
@@ -407,6 +422,8 @@ A角：熊俊伟 B角：蒋朝豪；"></textarea>
                  <div class="form-row"><label>存在法律风险</label><select id="attendees-legalRisk"><option value=""></option><option>是</option><option>否</option></select></div>
             </div>
             <textarea id="attendees-output" readonly rows="8"></textarea>
+
+            
             <button id="close-attendees-modal" class="btn">关闭</button>
         </div>
     </div>
