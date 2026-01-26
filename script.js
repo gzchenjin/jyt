@@ -615,13 +615,11 @@ document.addEventListener('DOMContentLoaded', function() {
         showReportDialog("商机评估会纪要", report);
 
         // --- 发送给服务器部分（修改这里）---
-        const data = gatherFormData();
-        
+        //const data = gatherFormData();
         // 【核心修改】：直接修改项目名称，加上标记
         // 假设您的表单里项目名称字段叫 project_name
-        data.projectName = data.projectName + "【商机】"; 
-        
-        saveDataToBackend(data); 
+        //data.projectName = data.projectName + "【商机】"; 
+        //saveDataToBackend(data); 
     });
 
     // 2. 投标评估
@@ -630,12 +628,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const report = generateBiddingMinutes(formData);
         showReportDialog("投标评估会纪要", report);
 
-        const data = gatherFormData();
-        
-        // 【核心修改】
-        data.projectName = data.projectName + "【投标】"; 
-        
-        saveDataToBackend(data); 
+        //const data = gatherFormData();
+        //data.projectName = data.projectName + "【投标】"; 
+        //saveDataToBackend(data); 
     });
     
     // 3. 项目交底
@@ -644,12 +639,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const report = generateKickoffMinutes(formData);
         showReportDialog("项目交底会纪要", report);
 
-        const data = gatherFormData();
-        
-        // 【核心修改】
-        data.projectName = data.projectName + "【交底】"; 
-        
-        saveDataToBackend(data); 
+        //const data = gatherFormData();     
+        //data.projectName = data.projectName + "【交底】"; 
+        //saveDataToBackend(data); 
     });
 
     // ======================= MODAL/DIALOG HANDLING =======================
@@ -757,9 +749,14 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         const all = {
-            '项目经理': getRoleString("项目经理"), '销售经理': getRoleString("销售经理"), '方案经理': getRoleString("方案经理"), '交付经理': getRoleString("交付经理"),
-            '法律风险评估': "法律风险评估: 李屹【法律合规部】", '项目合作': "项目合作评估: 黄曦楠/许仲华【市场及渠道支撑部（标前）】",
-            '采购评估': "采购评估: 梁其容/罗晓纯【采购部】", '网信安评估': "网信安评估: 吴中华/陆艺阳【运营管理部/研发与质量管理中心、智慧网络运营事业部】",
+            '项目经理': getRoleString("项目经理"), 
+            '销售经理': getRoleString("销售经理"), 
+            '方案经理': getRoleString("方案经理"), 
+            '交付经理': getRoleString("交付经理"),
+            '法律风险评估': "法律风险评估: 李屹【法律合规部】", 
+            '项目合作': "项目合作评估: 黄曦楠/许仲华【市场及渠道支撑部（标前）】",
+            '采购评估': "采购评估: 梁其容/罗晓纯【采购部】", 
+            '网信安评估': "网信安评估: 吴中华/陆艺阳【运营管理部/研发与质量管理中心、智慧网络运营事业部】",
             '运维服务评估意见': "运维服务评估: 熊俊伟, 蒋朝豪【运营管理部/研发与质量管理中心】",
             '公共架构评估': (() => {
                 const archMap = {
@@ -780,6 +777,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const budget = _safeFloat(getV('attendees-budgetAmount'));
         const procurement = getV('attendees-procurement'); // 获取是否涉及外采
         const level = getV('attendees-projectLevel');       // 获取项目级别
+        const industry = getV('attendees-industryType');     // [新增] 行业/电信
+        const cooperation = getV('attendees-cooperation'); // [关键] 项目合作/变更
+        
 
         if (budget >= 50) {
             // 首先判断：如果不涉及外采 且 项目级别是 B类 或 C类
@@ -812,6 +812,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (optionalFlags[role] && all[role]) final.push(all[role]);
         });
         
+        // --- [修改] 4. 领导参会提示 ---
+        // 条件：
+        // 1. 行业
+        // 2. A类
+        // 3. 涉及投标会
+        // 4. (外采是“是” OR 项目合作是“是”)  <-- 这里用了 || (或)
+        if (industry === '行业' && level === 'A类' && meetingType.includes('投标') && 
+           (procurement === '是' || cooperation === '是')) {
+            final.push("⚠️ 行业域需外采A类项目：邀请渠道部门领导、涉及外采的产能部门领导以及市场及渠道支撑部领导（正职或分管该业务的副职）共同参会");
+        }
+
+
+
         DOMElements.attendeesOutput.value = [...new Set(final)].join('\n');
     }
     DOMElements.attendeesForm.addEventListener('change', updateAttendeesList);
@@ -1099,12 +1112,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // ======================= 免填写粘贴 =======================
     // 绑定按钮事件
     const pasteBtn = document.getElementById('btn-smart-paste');
-        if (pasteBtn) {
-            pasteBtn.addEventListener('click', handleSmartPaste);
-        }
-    });
-    
-    // ======================= 最终完美版 (修复项目名称串标) =======================
+    if (pasteBtn) {
+        pasteBtn.addEventListener('click', handleSmartPaste);
+    }
+});
+
+    // ======================= 最终稳健版 (修复预算漏抓 + 商机编码串标) =======================
     async function handleSmartPaste() {
         try {
             let text = '';
@@ -1112,7 +1125,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 try { text = await navigator.clipboard.readText(); } catch (e) {}
             }
             if (!text || !text.trim()) {
-                const manualText = prompt("⚠️ 无法自动读取。\n请在此框中按下 Ctrl+V 粘贴内容：");
+                const manualText = prompt("⚠️ 请在此框中按下 Ctrl+V 粘贴内容：");
                 if (manualText) text = manualText;
             }
             if (!text || !text.trim()) return;
@@ -1126,7 +1139,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // --- A. 基础字段 ---
             count += setInputValue('projectName', data.projectName);
             
-            // 商机编号清洗
+            // [修复] 商机编码：遇到空格/换行/“合同”二字立即截断
             if (data.businessCode) {
                 let cleanCode = data.businessCode.split(/[\s\t\n]+|合同编号|项目类型/)[0];
                 count += setInputValue('businessCode', cleanCode);
@@ -1135,8 +1148,9 @@ document.addEventListener('DOMContentLoaded', function() {
             count += setInputValue('contractClient', data.client);
             count += setInputValue('constructionContent', data.content);
             
-            // --- B. 预算金额 ---
+            // --- B. [重点修复] 预算金额 ---
             if (data.budget) {
+                // 提取金额数字（支持逗号）
                 const match = data.budget.match(/[\d,]+(\.\d+)?/);
                 if (match) {
                     const money = match[0].replace(/,/g, '');
@@ -1148,7 +1162,7 @@ document.addEventListener('DOMContentLoaded', function() {
             count += setSelectValue('projectLevel', data.level);
             count += setSelectValue('capacityType', data.capacityType);
             
-            // --- D. 外采联动 ---
+            // --- D. 外采联动 (修复布局显示) ---
             if (data.extBudget) {
                 const match = data.extBudget.match(/[\d,]+(\.\d+)?/);
                 if (match) {
@@ -1163,7 +1177,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         if (data.procurementSituation) {
                             const riskRow = document.getElementById('procurementRiskRow');
-                            if (riskRow) riskRow.style.display = ''; // 恢复布局
+                            // 使用空字符串恢复默认 display (flex/block)
+                            if (riskRow) riskRow.style.display = ''; 
                             count += setInputValue('procurementRisk', data.procurementSituation);
                         }
                     } else {
@@ -1224,14 +1239,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         btn.innerText = originalText;
                         btn.style.backgroundColor = '';
                     }, 2000);
-                }
+                } 
             } else {
                 alert('未识别到有效数据，请检查复制内容。');
             }
         
         } catch (err) {
             console.error('粘贴出错:', err);
-            alert('程序发生错误，请检查控制台。');
+            alert('程序错误，请查看控制台。');
         }
     }
     
@@ -1258,6 +1273,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const isMoneyLine = (str) => {
             if (!/\d/.test(str)) return false; 
             if (str.includes('结构') || str.includes('含税') || str.includes('不含税')) return false; 
+            // 排除纯文字标签，但如果标签后跟着数字则保留
             if (str.includes('合同金额') && !/\d/.test(str.replace('合同金额',''))) return false; 
             if ((str.match(/-/g)||[]).length >= 2 || (str.match(/\//g)||[]).length >= 2) return false;
             return true;
@@ -1278,35 +1294,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 result.businessCode = getValue(); 
             }
         
-            // 2. [修复] 项目名称 (处理 "项目名称：xxx 客户名称：yyy" 同行情况)
-            else if (line.includes('项目名称') && !line.includes('ID')) {
-                let val = getValue();
-                // 如果取到的值里包含了“客户名称”或“商机编号”，说明串行了，截断它
-                if (val) {
-                    val = val.split(/[\t\s]+客户名称|客户名称|[\t\s]+商机编号|商机编号/)[0].trim();
-                }
-                result.projectName = val;
-            }
-        
-            // 3. 项目预算
-            else if (line === '项目预算' || (line.includes('项目预算') && !line.includes('结构'))) {
+            // 2. [重点修复] 项目预算
+            // 必须以 "项目预算" 开头，防止匹配到 "项目级别...含税的项目预算" 这种描述文字
+            else if (line.startsWith('项目预算')) {
                 const parts = line.split(/[:：]/);
+                // 2.1 先看当前行冒号后有没有钱
                 if (parts.length > 1 && isMoneyLine(parts[1])) {
                     result.budget = parts[1];
                 } else {
+                    // 2.2 否则往后找8行 (加大范围，跳过所有干扰)
                     for (let k = 1; k <= 8; k++) {
                         if (i + k >= lines.length) break;
                         const nextRow = lines[i + k];
+                        
+                        // 遇到明显的新大标题才停，但跳过 "合同金额" 这种伪标题
                         if (isKey(nextRow) && !nextRow.includes('合同金额') && !nextRow.includes('软件金额')) break;
+                        
                         if (isMoneyLine(nextRow)) {
                             result.budget = nextRow;
-                            break;
+                            break; 
                         }
                     }
                 }
             }
         
-            // 4. 毛利率/净利率
+            // 3. 毛利率/净利率
             else if (line.includes('毛利率')) {
                 let match = line.match(/(-?\d+(\.\d+)?)%/);
                 result.grossMargin = match ? match[0] : getValue();
@@ -1316,7 +1328,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 result.netMargin = match ? match[0] : getValue();
             }
         
-            // 5. 建设内容 (多行)
+            // 4. 建设内容 (多行)
             else if (line.startsWith('建设内容')) {
                 let contentArr = [];
                 const parts = line.split(/[:：]/);
@@ -1324,6 +1336,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let j = i + 1;
                 while (j < lines.length) {
                     const nextRow = lines[j];
+                    // 停止条件：遇到 Key (且不以数字开头)
                     if (nextRow.startsWith('项目预算') || (isKey(nextRow) && !/^\d+[、\.]/.test(nextRow))) break;
                     contentArr.push(nextRow);
                     j++;
@@ -1332,7 +1345,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 i = j - 1;
             }
         
-            // 6. 外采风险 (多行)
+            // 5. 外采风险 (多行 + 截断)
             else if (line.startsWith('项目后向采购基本情况')) {
                 let contentArr = [];
                 const parts = line.split(/[:：]/);
@@ -1348,7 +1361,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 i = j - 1;
             }
         
-            // 7. 外部采购预算
+            // 6. 外部采购预算
             else if (line.includes('外部采购预算') || line.includes('外部采购金额')) {
                 for (let k = 1; k <= 3; k++) {
                     if (i + k >= lines.length) break;
@@ -1360,7 +1373,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         
-            // 8. 其他字段
+            // 7. 其他字段
+            else if (line.includes('项目名称') && !line.includes('ID')) result.projectName = getValue();
             else if (line.startsWith('签约客户') || line.startsWith('客户名称')) result.client = getValue();
             else if (line.startsWith('项目级别')) { const val = getValue(); if (val.length < 10) result.level = val; }
             else if (line.includes('产品能力')) result.capacityType = getValue();
@@ -1458,4 +1472,3 @@ async function saveDataToBackend(data) {
         //alert('无法连接到后端服务器，请检查服务器是否正在运行且防火墙已配置。'); // 弹出连接错误提示
     }
 }
-
