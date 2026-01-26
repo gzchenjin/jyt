@@ -615,11 +615,11 @@ document.addEventListener('DOMContentLoaded', function() {
         showReportDialog("商机评估会纪要", report);
 
         // --- 发送给服务器部分（修改这里）---
-        //const data = gatherFormData();
+        const data = gatherFormData();
         // 【核心修改】：直接修改项目名称，加上标记
         // 假设您的表单里项目名称字段叫 project_name
-        //data.projectName = data.projectName + "【商机】"; 
-        //saveDataToBackend(data); 
+        data.projectName = data.projectName + "【商机】"; 
+        saveDataToBackend(data); 
     });
 
     // 2. 投标评估
@@ -628,9 +628,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const report = generateBiddingMinutes(formData);
         showReportDialog("投标评估会纪要", report);
 
-        //const data = gatherFormData();
-        //data.projectName = data.projectName + "【投标】"; 
-        //saveDataToBackend(data); 
+        const data = gatherFormData();
+        data.projectName = data.projectName + "【投标】"; 
+        saveDataToBackend(data); 
     });
     
     // 3. 项目交底
@@ -639,9 +639,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const report = generateKickoffMinutes(formData);
         showReportDialog("项目交底会纪要", report);
 
-        //const data = gatherFormData();     
-        //data.projectName = data.projectName + "【交底】"; 
-        //saveDataToBackend(data); 
+        const data = gatherFormData();     
+        data.projectName = data.projectName + "【交底】"; 
+        saveDataToBackend(data); 
     });
 
     // ======================= MODAL/DIALOG HANDLING =======================
@@ -1472,3 +1472,4 @@ async function saveDataToBackend(data) {
         //alert('无法连接到后端服务器，请检查服务器是否正在运行且防火墙已配置。'); // 弹出连接错误提示
     }
 }
+
