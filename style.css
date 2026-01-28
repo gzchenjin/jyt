@@ -481,6 +481,49 @@ input:disabled, select:disabled, textarea:disabled {
 
 /* --- 参会人员清单文本框高度调整 --- */
 #attendees-output {
-    min-height: 160px; /* 您可以随意修改这个数值，例如 300px, 400px */
+    min-height: 300px; /* 您可以随意修改这个数值，例如 300px, 400px */
     height: auto;
+}
+
+/* --- 强制改造：一行两列样式 --- */
+
+/* 1. 将原本的表单容器改为网格布局 */
+.attendees-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 强制平分两列 */
+    column-gap: 30px; /* 列间距 */
+    row-gap: 10px;    /* 行间距 */
+    padding: 5px;
+}
+
+/* 2. 修正每一行的样式，去掉原本的下边距 */
+.attendees-form .form-row {
+    margin-bottom: 0 !important; /* 覆盖原来的 margin */
+    display: flex;
+    align-items: center;
+    width: 100%; /* 确保填满格子 */
+}
+
+/* 3. 统一 Label 宽度，确保整齐 */
+.attendees-form .form-row label {
+    width: 90px;      /* 固定宽度 */
+    text-align: right;
+    margin-right: 10px;
+    flex-shrink: 0;   /* 防止被挤压 */
+    font-weight: 600;
+}
+
+/* 4. 特殊处理：带提示文字的选项需顶部对齐 */
+.attendees-form .form-row.align-top {
+    align-items: flex-start;
+}
+.attendees-form .form-row.align-top label {
+    margin-top: 8px;
+}
+
+/* 5. 屏幕变窄时（手机端）自动变回单列，防止错乱 */
+@media (max-width: 768px) {
+    .attendees-form {
+        grid-template-columns: 1fr;
+    }
 }
