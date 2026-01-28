@@ -393,38 +393,39 @@ A角：熊俊伟 B角：蒋朝豪；"></textarea>
         </div>
     </div>
 
-    <div id="attendees-modal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
+       <div id="attendees-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="min-width: 750px;">
             <h3>参会人员清单</h3>
-            <p class="small-text">请填写全部信息，否则参会人员显示不全</p>
+            <p class="small-text" style="color:#666; margin-bottom: 10px;">请填写全部信息，否则参会人员显示不全</p>
+        
             <div class="attendees-form">
-                 <div class="form-row"><label>会议类型</label><select id="attendees-meetingType"><option value=""></option><option>商机评估会</option><option>投标评估会</option><option>商机、投标评估会</option><option>项目交底会</option></select></div>
-                 <div class="form-row"><label>项目级别</label><select id="attendees-projectLevel"><option value=""></option><option>A类</option><option>B类</option><option>C类</option></select></div>
+            
+                <div class="form-row"><label>会议类型</label><select id="attendees-meetingType"><option value=""></option><option>商机评估会</option><option>投标评估会</option><option>商机、投标评估会</option><option>项目交底会</option></select></div>
+                <div class="form-row"><label>项目级别</label><select id="attendees-projectLevel"><option value=""></option><option>A类</option><option>B类</option><option>C类</option></select></div>
 
-                <div class="form-row">
-                    <label>行业/电信-A类必选</label>
-                    <div style="display: flex; flex-direction: column; flex: 1;">
+                <div class="form-row"><label>项目预算(万)</label><input type="number" id="attendees-budgetAmount" placeholder="请输入数字"></div>
+                <div class="form-row align-top">
+                    <label>行业/电信</label>
+                    <div style="flex:1; display:flex; flex-direction:column;">
                         <select id="attendees-industryType">
-                            <option value="" disabled selected></option>
+                            <option value="" disabled selected>请选择</option>
                             <option value="行业">行业</option>
                             <option value="电信">电信</option>
                         </select>
-                        <small style="color: #888; font-size: 12px; margin-top: 4px; line-height: 1.2;">
-                            * 行业域项目定义：最终客户为非电信
-                        </small>
+                        <small style="color:#999; font-size:12px; margin-top:2px;">* 行业域定义：最终客户非电信</small>
                     </div>
                 </div>
 
-                 <div class="form-row"><label>项目预算(万元)</label><input type="text" id="attendees-budgetAmount"></div>
-                 <div class="form-row"><label>项目合作/变更</label><select id="attendees-cooperation"><option value=""></option><option>是</option><option>否</option></select></div>
-                 <div class="form-row"><label>涉及外采/变更</label><select id="attendees-procurement"><option value=""></option><option>是</option><option>否</option></select></div>
-                 <div class="form-row"><label>亿迅主责系统</label><select id="attendees-primarySystem"><option value=""></option><option>是</option><option>否</option></select></div>
-                 <div class="form-row"><label>存在法律风险</label><select id="attendees-legalRisk"><option value=""></option><option>是</option><option>否</option></select></div>
-            </div>
-            <textarea id="attendees-output" readonly rows="8"></textarea>
+                <div class="form-row"><label>项目合作</label><select id="attendees-cooperation"><option value=""></option><option>是</option><option>否</option></select></div>
+                <div class="form-row"><label>涉及外采</label><select id="attendees-procurement"><option value=""></option><option>是</option><option>否</option></select></div>
 
-            
-            <button id="close-attendees-modal" class="btn">关闭</button>
+                <div class="form-row"><label>亿迅主责</label><select id="attendees-primarySystem"><option value=""></option><option>是</option><option>否</option></select></div>
+                <div class="form-row"><label>法律风险</label><select id="attendees-legalRisk"><option value=""></option><option>是</option><option>否</option></select></div>
+            </div>
+
+            <textarea id="attendees-output" readonly style="height: 350px; margin-top: 20px; font-size: 14px; line-height: 1.8;"></textarea>
+
+            <button id="close-attendees-modal" class="btn" style="margin-top: 15px; align-self: flex-end;">关闭</button>
         </div>
     </div>
     
@@ -446,3 +447,4 @@ A角：熊俊伟 B角：蒋朝豪；"></textarea>
     <script src="script.js"></script>
 </body>
 </html>
+
