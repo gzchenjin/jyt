@@ -799,19 +799,41 @@ document.addEventListener('DOMContentLoaded', function() {
             "商机、投标评估会": ["项目经理", "销售经理", "方案经理", "交付经理", "运维服务评估意见", "财务评估"],
         };
 
-        const optionalFlags = {
-            "项目合作": getV('attendees-cooperation') === '是',
-            "采购评估": getV('attendees-procurement') === '是',
-            "网信安评估": getV('attendees-primarySystem') === '是',
-            "法律风险评估": getV('attendees-legalRisk') === '是',
+        // --- 新逻辑开始 ---
+        const meetingType = getV('attendees-meetingType'); // 先获取会议类型
+
+        // 定义规则：不仅要选“是”，还要看会议类型是否匹配
+        const optionalRules = {
+            "项目合作": {
+                enabled: getV('attendees-cooperation') === '是',
+                meetings: ["商机评估会", "投标评估会", "商机、投标评估会"]
+            },
+            "采购评估": {
+                enabled: getV('attendees-procurement') === '是',
+                meetings: ["商机评估会", "投标评估会", "商机、投标评估会", "项目交底会"]
+            },
+            "网信安评估": {
+                enabled: getV('attendees-primarySystem') === '是',
+                meetings: ["投标评估会", "商机、投标评估会"]
+            },
+            "法律风险评估": {
+                enabled: getV('attendees-legalRisk') === '是',
+                meetings: ["商机评估会", "投标评估会", "商机、投标评估会", "项目交底会"]
+            }
         };
 
-        const meetingType = getV('attendees-meetingType');
+        // 1. 先生成必选人员
         let final = (required[meetingType] || []).map(role => all[role]).filter(Boolean);
-        Object.keys(optionalFlags).forEach(role => {
-            if (optionalFlags[role] && all[role]) final.push(all[role]);
+
+        // 2. 再根据规则添加可选人员
+        Object.keys(optionalRules).forEach(role => {
+            const rule = optionalRules[role];
+            // 只有当：[开关开了] 且 [当前会议类型在允许列表中] 且 [该角色存在] 时，才添加
+            if (rule.enabled && rule.meetings.includes(meetingType) && all[role]) {
+                final.push(all[role]);
+            }
         });
-        
+        // --- 新逻辑结束 ---
         // --- [修改] 4. 领导参会提示 ---
         // 条件：
         // 1. 行业
@@ -1472,4 +1494,5 @@ async function saveDataToBackend(data) {
         //alert('无法连接到后端服务器，请检查服务器是否正在运行且防火墙已配置。'); // 弹出连接错误提示
     }
 }
+
 
