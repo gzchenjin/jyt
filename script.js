@@ -601,7 +601,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        output += "四、其他参会部门意见\n公共架构评估师意见详见会议纪要中【公共架构结论】部分。\n五、会议结论\n项目铁三角对项目情况、项目角色分工、项目计划及里程碑节点、项目风险及问题解决方案等内容均已了解清晰，交底完成，请项目组尽快完成合同签约。";
+        output += "四、会议结论\n项目铁三角对项目情况、项目角色分工、项目计划及里程碑节点、项目风险及问题解决方案等内容均已了解清晰，交底完成，请项目组尽快完成合同签约。";
         return output;
     }
     
@@ -615,11 +615,11 @@ document.addEventListener('DOMContentLoaded', function() {
         showReportDialog("商机评估会纪要", report);
 
         // --- 发送给服务器部分（修改这里）---
-        const data = gatherFormData();
+        //const data = gatherFormData();
         // 【核心修改】：直接修改项目名称，加上标记
         // 假设您的表单里项目名称字段叫 project_name
-        data.projectName = data.projectName + "【商机】"; 
-        saveDataToBackend(data); 
+        //data.projectName = data.projectName + "【商机】"; 
+        //saveDataToBackend(data); 
     });
 
     // 2. 投标评估
@@ -628,9 +628,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const report = generateBiddingMinutes(formData);
         showReportDialog("投标评估会纪要", report);
 
-        const data = gatherFormData();
-        data.projectName = data.projectName + "【投标】"; 
-        saveDataToBackend(data); 
+        //const data = gatherFormData();
+        //data.projectName = data.projectName + "【投标】"; 
+        //saveDataToBackend(data); 
     });
     
     // 3. 项目交底
@@ -639,9 +639,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const report = generateKickoffMinutes(formData);
         showReportDialog("项目交底会纪要", report);
 
-        const data = gatherFormData();     
-        data.projectName = data.projectName + "【交底】"; 
-        saveDataToBackend(data); 
+        //const data = gatherFormData();     
+        //data.projectName = data.projectName + "【交底】"; 
+        //saveDataToBackend(data); 
     });
 
     // ======================= MODAL/DIALOG HANDLING =======================
@@ -757,21 +757,21 @@ document.addEventListener('DOMContentLoaded', function() {
             '项目合作': "项目合作评估: 黄曦楠/许仲华【市场及渠道支撑部（标前）】",
             '采购评估': "采购评估: 梁其容/罗晓纯【采购部】", 
             '网信安评估': "网信安评估: 吴中华/陆艺阳【运营管理部/研发与质量管理中心、智慧网络运营事业部】",
-            '运维服务评估意见': "运维服务评估: 熊俊伟, 蒋朝豪【运营管理部/研发与质量管理中心】",
-            '公共架构评估': (() => {
-                const archMap = {
-                    "IT系统事业部": "王沛文、高航",
-                    "大数据AI应用事业部": "许智洋",
-                    "数字政府事业部/社会治理大数据研究院广州分院": "李佳鑫、许伟明",
-                    "云网事业部": "许智洋",
-                    "智呼事业部": "郑辉",
-                    "智慧企业集成事业部/工业主研院": "郑辉、陈家辉",
-                    "智慧网络运营事业部": "周宏江、高航、许伟明",
-                    "智慧业财事业部": "王沛文",
-                };
-                const pmDept = roles["项目经理"]?.department;
-                return `公共架构评估师： ${archMap[pmDept] || ''}【运营管理部/研发与质量管理中心】`;
-            })()
+            '运维服务评估意见': "运维服务评估: 熊俊伟/蒋朝豪【运营管理部/研发与质量管理中心】",
+            // '公共架构评估': (() => {
+            //     const archMap = {
+            //         "IT系统事业部": "王沛文、高航",
+            //         "大数据AI应用事业部": "许智洋",
+            //         "数字政府事业部/社会治理大数据研究院广州分院": "李佳鑫、许伟明",
+            //         "云网事业部": "许智洋",
+            //         "智呼事业部": "郑辉",
+            //         "智慧企业集成事业部/工业主研院": "郑辉、陈家辉",
+            //         "智慧网络运营事业部": "周宏江、高航、许伟明",
+            //         "智慧业财事业部": "王沛文",
+            //     };
+            //     const pmDept = roles["项目经理"]?.department;
+            //     return `公共架构评估师： ${archMap[pmDept] || ''}【运营管理部/研发与质量管理中心】`;
+            // })()
         };
 
         const budget = _safeFloat(getV('attendees-budgetAmount'));
@@ -795,7 +795,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const required = {
             "商机评估会": ["项目经理", "销售经理", "方案经理", "交付经理"],
             "投标评估会": ["项目经理", "销售经理", "方案经理", "交付经理", "运维服务评估意见", "财务评估"],
-            "项目交底会": ["项目经理", "销售经理", "方案经理", "交付经理", "公共架构评估"],
+            "项目交底会": ["项目经理", "销售经理", "方案经理", "交付经理"],
             "商机、投标评估会": ["项目经理", "销售经理", "方案经理", "交付经理", "运维服务评估意见", "财务评估"],
         };
 
@@ -1494,5 +1494,4 @@ async function saveDataToBackend(data) {
         //alert('无法连接到后端服务器，请检查服务器是否正在运行且防火墙已配置。'); // 弹出连接错误提示
     }
 }
-
 
