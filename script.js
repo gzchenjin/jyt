@@ -615,7 +615,7 @@ document.addEventListener('DOMContentLoaded', function() {
         showReportDialog("商机评估会纪要", report);
 
         // --- 发送给服务器部分（修改这里）---
-        /const data = gatherFormData();
+        const data = gatherFormData();
         // 【核心修改】：直接修改项目名称，加上标记
         // 假设您的表单里项目名称字段叫 project_name
         data.projectName = data.projectName + "【商机】"; 
