@@ -401,10 +401,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const SJ_projectRisk = `本项目存在风险：\n${getVal('SJ_projectRisk', "【请补充项目风险（商机）】")}`;
         const OT_risk = getVal('OT_risk');
         
-        const clientDescription = !temp.contractClient  ? "【请补充签约客户】"
-          : `${temp.contractClient}` 
-          + ((!temp.endClient || temp.endClient === temp.contractClient) ? '。'
-          : `，最终客户是${temp.endClient}。`);
+       const clientDescription = (() => {
+            const contract = temp.contractClient ? temp.contractClient.trim() : "【请补充签约客户】";
+            const end = temp.endClient ? temp.endClient.trim() : "";
+
+            if (!end) {
+                return `签约客户是${contract}。`;
+            } else if (contract === end) {
+                return `签约客户及最终客户是${contract}。`;
+            } else {
+                return `签约客户是${contract}，最终客户是${end}。`;
+            }
+        })();
 
         let procurement_text = temp.procurement === '是' ? `涉及外采，外采预算${temp.procurement_in_wan.toFixed(2)}万元（含税），`
             : temp.procurement === '否' ? '不涉及外采，' : '【请选择是否后向外采】，';
@@ -423,7 +431,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
         
-        const key1_text = `本项目是${projectName}，项目签约客户是${clientDescription}项目建设内容为${constructionContent}`;
+        const key1_text = `本项目是${projectName}，项目${clientDescription}项目建设内容为${constructionContent}`;
         const key2_text = `本项目属于${capacityType}${projectLevel}项目，由${temp.lead_department}牵头，${temp.assist_departments_summary}${temp.tjs_summary}${temp.delivery_summary}`;
         const key3_text = `本项目预算${temp.budget_in_wan.toFixed(2)}万元（含税），${procurement_text}毛利率预估${_safeFloat(temp.SJ_grossMargin).toFixed(2)}%（不含税），利润率预估${_safeFloat(temp.SJ_netMargin).toFixed(2)}%（不含税）`;
 
@@ -463,10 +471,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const OT_risk = getVal('OT_risk');
         const TB_biddingRisk = getVal('TB_biddingRisk', "【请补充招投标风险评估】");
 
-        const clientDescription = !temp.contractClient  ? "【请补充签约客户】"
-          : `${temp.contractClient}` 
-          + ((!temp.endClient || temp.endClient === temp.contractClient) ? '。'
-          : `，最终客户是${temp.endClient}。`);
+       const clientDescription = (() => {
+            const contract = temp.contractClient ? temp.contractClient.trim() : "【请补充签约客户】";
+            const end = temp.endClient ? temp.endClient.trim() : "";
+
+            if (!end) {
+                return `签约客户是${contract}。`;
+            } else if (contract === end) {
+                return `签约客户及最终客户是${contract}。`;
+            } else {
+                return `签约客户是${contract}，最终客户是${end}。`;
+            }
+        })();
         
 
         const bidMethodsWithRisk = ["公开招标", "邀请招标", "比选"];
@@ -501,7 +517,7 @@ document.addEventListener('DOMContentLoaded', function() {
             : constructionContent;
 
 
-        const key1_text = `本项目为${TB_businessType}项目，项目签约客户是${clientDescription}客户计划采用${bid_method_desc}。`;
+       const key1_text = `本项目为${TB_businessType}项目，项目${clientDescription}客户计划采用${bid_method_desc}。`;
         const key2_text = `项目建设内容为：${trimmedContent}。由${temp.lead_department}牵头，${temp.assist_departments_summary}${temp.tjs_summary}${temp.delivery_summary}`;
         const key3_text = `本项目预算${temp.budget_in_wan.toFixed(2)}万元（含税），属于${capacityType}${projectLevel}项目，${procurement_text}毛利率预估${_safeFloat(temp.TB_grossMargin).toFixed(2)}%（不含税）。`;
         const key4_text = `本项目交付要求：交付周期为${TB_deliveryPeriod}，${TB_deliveryRisk}`;
@@ -541,10 +557,19 @@ document.addEventListener('DOMContentLoaded', function() {
         const JD_testingRequirements = getVal('JD_testingRequirements', "【请补充等保测评、第三方测评要求】");
         const OT_risk = getVal('OT_risk');
 
-        const clientDescription = !temp.contractClient  ? "【请补充签约客户】"
-          : `${temp.contractClient}` 
-          + ((!temp.endClient || temp.endClient === temp.contractClient) ? '。'
-          : `，最终客户是${temp.endClient}。`);
+       const clientDescription = (() => {
+            const contract = temp.contractClient ? temp.contractClient.trim() : "【请补充签约客户】";
+            const end = temp.endClient ? temp.endClient.trim() : "";
+
+            if (!end) {
+                return `签约客户是${contract}。`;
+            } else if (contract === end) {
+                return `签约客户及最终客户是${contract}。`;
+            } else {
+                return `签约客户是${contract}，最终客户是${end}。`;
+            }
+        })();
+
 
         // ========================[ 这里是您确认的最新逻辑 ]========================
         const bid_method_desc = (method => {
@@ -584,7 +609,8 @@ document.addEventListener('DOMContentLoaded', function() {
             ? constructionContent.slice(0, -1) 
             : constructionContent;
         
-        const key1_text = `本项目为${JD_businessType}项目，项目签约客户是${clientDescription}客户采用${bid_method_desc}。`;
+       // 注意这里去掉了原先硬编码的“签约客户是”
+        const key1_text = `本项目为${JD_businessType}项目，项目${clientDescription}客户采用${bid_method_desc}。`;
         const key2_text = `本项目预算${temp.budget_in_wan.toFixed(2)}万元（含税），${procurement_text}`;
         const key3_text = `项目建设内容为：${trimmedContent}。本项目属于${capacityType}${projectLevel}项目，由${temp.lead_department}牵头，${temp.assist_departments_summary}${temp.tjs_summary}${temp.delivery_summary}`;
         const key4_text = "1、项目售前资料交底：销售经理、方案经理已对项目所有售前的会议纪要、客户沟通记录、客户需求及交付要求等资料交接给交付经理、项目经理；\n2、项目投标资料交底：销售经理、方案经理已对招标文件、投标文件、技术规范书等资料交接给交付经理、项目经理；\n3、项目实施计划交底：项目经理已完成项目里程碑计划，各关键节点已有明确的交付成果要求，铁三角已确认该时间节点可行；\n4、项目干系人交底：销售经理已上传项目干系人清单，清单已包含客户（签约客户/最终客户）以及合作伙伴干系人的名单和联系方式，铁三角对项目干系人已知晓。";
@@ -604,7 +630,6 @@ document.addEventListener('DOMContentLoaded', function() {
         output += "四、会议结论\n项目铁三角对项目情况、项目角色分工、项目计划及里程碑节点、项目风险及问题解决方案等内容均已了解清晰，交底完成，请项目组尽快完成合同签约。";
         return output;
     }
-    
     // ======================= EVENT LISTENERS FOR BUTTONS =======================
     
     // 1. 商机评估
