@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
             PM_DATA = data.pm_data;
             EMAIL_DATA = data.email_data;
             console.log("人员与邮件数据加载成功！");
+            if (typeof window.checkPMRisk === 'function') window.checkPMRisk();
         })
         .catch(error => {
             console.error('数据加载失败:', error);
@@ -197,6 +198,54 @@ document.addEventListener('DOMContentLoaded', function() {
     setupConditionalVisibility('SJ_preInvestmentNeeded', 'SJ_preInvestmentDetailsRow');
     setupConditionalVisibility('TB_projectCooperationNeeded', 'TB_projectCooperationAssessmentRow');
     setupConditionalVisibility('TB_isPrimarySystem', 'TB_securityAssessmentRow');
+
+    // ======================= PM RISK CHECK LOGIC =======================
+    window.checkPMRisk = function() {
+        const btn = document.getElementById('btn-query-pm');
+        if (!btn) return;
+        
+        if (!PM_DATA || PM_DATA.length === 0) {
+            btn.style.backgroundColor = '';
+            btn.style.borderColor = '';
+            btn.style.color = '';
+            return;
+        }
+
+        const projLevel = DOMElements.projectLevel.value;
+        const ironTriangleText = DOMElements.ironTriangleInput.value;
+        
+        if (projLevel === 'A类' && ironTriangleText) {
+            const pattern = /项目经理\s*[:：]\s*(.+?)\s*[(（](.+?)[)）]/s;
+            const match = ironTriangleText.match(pattern);
+            if (match) {
+                const pmName = match[1].trim();
+                const pmDept = match[2].trim();
+                
+                const matches = PM_DATA.filter(p => p.项目经理 === pmName);
+                if (matches.length > 0) {
+                    matches.sort((a, b) => (a.在职部门 === pmDept ? -1 : 1) - (b.在职部门 === pmDept ? -1 : 1));
+                    const bestMatch = matches[0];
+                    const level = bestMatch.级别 || '';
+                    
+                    if (!level.includes('高级') && !level.includes('资深') && !level.includes('专家')) {
+                        btn.style.backgroundColor = '#fd7e14'; // 橙色警告
+                        btn.style.borderColor = '#fd7e14';
+                        btn.style.color = '#fff';
+                        return;
+                    }
+                }
+            }
+        }
+        
+        // 恢复默认样式
+        btn.style.backgroundColor = '';
+        btn.style.borderColor = '';
+        btn.style.color = '';
+    };
+
+    DOMElements.projectLevel.addEventListener('change', window.checkPMRisk);
+    DOMElements.ironTriangleInput.addEventListener('change', window.checkPMRisk);
+    DOMElements.ironTriangleInput.addEventListener('input', window.checkPMRisk);
 
     function updateBiddingFields(methodSelectId) {
         const method = document.getElementById(methodSelectId).value;
@@ -630,6 +679,7 @@ document.addEventListener('DOMContentLoaded', function() {
         output += "四、会议结论\n项目铁三角对项目情况、项目角色分工、项目计划及里程碑节点、项目风险及问题解决方案等内容均已了解清晰，交底完成，请项目组尽快完成合同签约。";
         return output;
     }
+    
     // ======================= EVENT LISTENERS FOR BUTTONS =======================
     
     // 1. 商机评估
@@ -640,11 +690,11 @@ document.addEventListener('DOMContentLoaded', function() {
         showReportDialog("商机评估会纪要", report);
 
         // --- 发送给服务器部分（修改这里）---
-        const data = gatherFormData();
+        //const data = gatherFormData();
         // 【核心修改】：直接修改项目名称，加上标记
         // 假设您的表单里项目名称字段叫 project_name
-        data.projectName = data.projectName + "【商机】"; 
-        saveDataToBackend(data); 
+        //data.projectName = data.projectName + "【商机】"; 
+        //saveDataToBackend(data); 
     });
 
     // 2. 投标评估
@@ -653,9 +703,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const report = generateBiddingMinutes(formData);
         showReportDialog("投标评估会纪要", report);
 
-        const data = gatherFormData();
-        data.projectName = data.projectName + "【投标】"; 
-        saveDataToBackend(data); 
+        //const data = gatherFormData();
+        //data.projectName = data.projectName + "【投标】"; 
+        //saveDataToBackend(data); 
     });
     
     // 3. 项目交底
@@ -664,9 +714,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const report = generateKickoffMinutes(formData);
         showReportDialog("项目交底会纪要", report);
 
-        const data = gatherFormData();     
-        data.projectName = data.projectName + "【交底】"; 
-        saveDataToBackend(data); 
+        //const data = gatherFormData();     
+        //data.projectName = data.projectName + "【交底】"; 
+        //saveDataToBackend(data); 
     });
 
     // ======================= MODAL/DIALOG HANDLING =======================
@@ -677,6 +727,25 @@ document.addEventListener('DOMContentLoaded', function() {
         DOMElements.reportModal.style.display = 'flex';
     }
     document.getElementById('close-report-modal').addEventListener('click', () => DOMElements.reportModal.style.display = 'none');
+    
+    // 复制纪要内容
+    document.getElementById('copy-report-modal').addEventListener('click', function() {
+        const textToCopy = DOMElements.reportText.value;
+        if (!textToCopy) return;
+        
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const originalText = this.innerHTML;
+            this.innerHTML = '✅ 复制成功';
+            this.style.backgroundColor = '#28a745';
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.style.backgroundColor = '';
+            }, 2000);
+        }).catch(err => {
+            console.error('复制失败:', err);
+            alert('复制失败，请手动全选复制！');
+        });
+    });
 
     // --- PM Query Modal Logic ---
     document.getElementById('btn-query-pm').addEventListener('click', () => {
@@ -1041,6 +1110,57 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('email-add-btn').addEventListener('click', () => addEmailDeptRow(true));
     document.getElementById('email-refresh-btn').addEventListener('click', repopulateEmailDepartments);
 
+    // --- 调用邮件客户端发送 ---
+    document.getElementById('email-send-btn').addEventListener('click', () => {
+        const recipientsText = DOMElements.emailOutput.value.trim();
+        if (!recipientsText) {
+            alert('⚠️ 请先选择至少一个部门，生成收件人列表。');
+            return;
+        }
+
+        // 解析收件人文本，提取纯邮箱地址
+        // 格式: "姓名1 <email1>； 姓名2 <email2>"
+        const emailRegex = /<([^>]+)>/g;
+        const emails = [];
+        let match;
+        while ((match = emailRegex.exec(recipientsText)) !== null) {
+            emails.push(match[1].trim());
+        }
+
+        if (emails.length === 0) {
+            alert('⚠️ 未能从收件人列表中提取到有效的邮箱地址。');
+            return;
+        }
+
+        // Foxmail 对 mailto: 多收件人支持很差，无论逗号还是分号都会把多个地址混成一个。
+        // 稳妥方案：全部收件人复制到剪贴板 → 打开 Foxmail 空邮件 → 粘贴即用。
+        const recipientsForClipboard = emails.join('; ');
+        const subject = document.getElementById('email-subject').value.trim();
+
+        navigator.clipboard.writeText(recipientsForClipboard).then(() => {
+            // 只传主题，不传收件人（避免 Foxmail 解析异常）
+            const mailto = subject
+                ? 'mailto:?subject=' + encodeURIComponent(subject)
+                : 'mailto:';
+            window.location.href = mailto;
+
+            // 延迟弹出提示，确保 Foxmail 窗口已唤起
+            setTimeout(() => {
+                alert('📋 收件人已复制到剪贴板：\n' + recipientsForClipboard + '\n\n请在 Foxmail 收件人栏粘贴 (Ctrl+V) 即可。');
+            }, 800);
+        }).catch(() => {
+            // clipboard API 失败时的降级方案
+            const subject = document.getElementById('email-subject').value.trim();
+            const mailto = subject
+                ? 'mailto:?subject=' + encodeURIComponent(subject)
+                : 'mailto:';
+            window.location.href = mailto;
+            alert('📋 请手动复制收件人：\n' + recipientsForClipboard + '\n\n然后在 Foxmail 收件人栏粘贴 (Ctrl+V) 即可。');
+        });
+
+        console.log('📧 收件人已复制到剪贴板:', recipientsForClipboard);
+    });
+
     // ======================= IMPORT/EXPORT LOGIC ======================
     
     document.getElementById('btn-export').addEventListener('click', () => {
@@ -1184,7 +1304,10 @@ document.addEventListener('DOMContentLoaded', function() {
             let count = 0;
         
             // --- A. 基础字段 ---
-            count += setInputValue('projectName', data.projectName);
+            if (data.projectName) {
+                let cleanName = data.projectName.split(/\t/)[0].replace(/[\s]*客户名称$/, '').trim();
+                count += setInputValue('projectName', cleanName);
+            }
             
             // [修复] 商机编码：遇到空格/换行/“合同”二字立即截断
             if (data.businessCode) {
@@ -1272,6 +1395,96 @@ document.addEventListener('DOMContentLoaded', function() {
                     ironInput.value = ironText;
                     highlightInput(ironInput);
                     count++;
+                }
+            }
+            
+            // --- H. 核心能力标签 ---
+            if (data.coreCapabilityTag && (data.coreCapabilityTag.includes('不涉及') || data.coreCapabilityTag === '空')) {
+                const coreSel = document.getElementById('coreCapability');
+                if (coreSel) {
+                    coreSel.disabled = false; // 确保可以写入
+                    count += setSelectValue('coreCapability', '否');
+                }
+            }
+
+            // --- I. 交付明细 (deliveryDetailsTable) ---
+            if (data.deliveryDepartments && data.deliveryDepartments.length > 0) {
+                const tbody = document.querySelector('#deliveryDetailsTable tbody');
+                if (tbody) {
+                    const rows = tbody.querySelectorAll('tr');
+                    
+                    let mainPmDept = '';
+                    if (data.pm) {
+                        let pmMatch = data.pm.match(/[(（](.*?)[)）]/);
+                        if (pmMatch) mainPmDept = pmMatch[1].trim();
+                    }
+                    
+                    // 合并相同部门并相加预算
+                    let mergedMap = new Map();
+                    data.deliveryDepartments.forEach(dept => {
+                        let deptName = dept.name.trim();
+                        let budgetNum = parseFloat(dept.budget) || 0;
+                        if (mergedMap.has(deptName)) {
+                            let existing = mergedMap.get(deptName);
+                            let existingBudget = parseFloat(existing.budget) || 0;
+                            existing.budget = (existingBudget + budgetNum).toFixed(2);
+                            if (!existing.pm && dept.pm) existing.pm = dept.pm;
+                        } else {
+                            mergedMap.set(deptName, { ...dept, name: deptName });
+                        }
+                    });
+                    
+                    let sortedDepts = Array.from(mergedMap.values());
+                    
+                    // 无论是否多产能，只要解析到了多行，都确保项目经理所在部门为牵头
+                    if (mainPmDept) {
+                        let pmDeptIdx = sortedDepts.findIndex(d => d.name.includes(mainPmDept) || mainPmDept.includes(d.name));
+                        if (pmDeptIdx >= 0) {
+                            let pmDept = sortedDepts.splice(pmDeptIdx, 1)[0];
+                            sortedDepts.unshift(pmDept);
+                        }
+                    }
+                    
+                    let rowIndex = 0;
+                    sortedDepts.forEach(dept => {
+                        if (rowIndex < rows.length) {
+                            let row = rows[rowIndex];
+                            let deptSelect = row.cells[1].querySelector('select');
+                            let pmInput = row.cells[2].querySelector('input');
+                            let budgetInput = row.cells[4].querySelector('input');
+                            
+                            if (deptSelect) {
+                                let matchedOpt = Array.from(deptSelect.options).find(opt => opt.text && (opt.text.includes(dept.name) || dept.name.includes(opt.text)));
+                                if (matchedOpt) {
+                                    deptSelect.value = matchedOpt.value;
+                                } else {
+                                    let newOpt = document.createElement('option');
+                                    newOpt.value = dept.name;
+                                    newOpt.text = dept.name;
+                                    deptSelect.add(newOpt);
+                                    deptSelect.value = dept.name;
+                                }
+                                deptSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                                highlightInput(deptSelect);
+                            }
+                            if (pmInput) {
+                                pmInput.value = dept.pm || '';
+                                highlightInput(pmInput);
+                            }
+                            if (budgetInput) {
+                                budgetInput.value = dept.budget || '';
+                                highlightInput(budgetInput);
+                            }
+                            
+                            rowIndex++;
+                            count++;
+                        }
+                    });
+                    
+                    if (rowIndex > 0) {
+                        const tableObj = document.getElementById('deliveryDetailsTable');
+                        if (tableObj) tableObj.style.display = 'table';
+                    }
                 }
             }
         
@@ -1407,6 +1620,52 @@ document.addEventListener('DOMContentLoaded', function() {
                 result.procurementSituation = contentArr.join('\n');
                 i = j - 1;
             }
+            
+            // 5.5 核心能力标签
+            else if (line.includes('核心能力标签')) {
+                result.coreCapabilityTag = getValue() || '空';
+            }
+
+            // 5.6 业务部门关联信息
+            else if (line === '业务部门关联信息') {
+                let j = i + 1;
+                let depts = [];
+                let state = 0; // 0: dept name, 1: team name, 2: amounts, 3: name
+                let currentDept = {};
+                
+                while (j < lines.length) {
+                    const nextRow = lines[j];
+                    if (nextRow === '合计' || nextRow.startsWith('基础信息') || (isKey(nextRow) && nextRow !== '业务部门关联信息')) {
+                        i = j - 1;
+                        break;
+                    }
+                    
+                    if (state === 0) {
+                        currentDept = { name: nextRow, budget: '', pm: '' };
+                        state = 1;
+                    } else if (state === 1) {
+                        state = 2; // team name ignored
+                    } else if (state === 2) {
+                        if (/^[\d,]+(\.\d+)?\s*元?$/.test(nextRow.trim())) {
+                            if (currentDept.budget === '') {
+                                let match = nextRow.match(/[\d,]+(\.\d+)?/);
+                                if (match) {
+                                    let num = parseFloat(match[0].replace(/,/g, ''));
+                                    currentDept.budget = (num / 10000).toFixed(2);
+                                }
+                            }
+                        } else {
+                            if (nextRow !== '请输入人名搜索') {
+                                currentDept.pm = nextRow.split(/[(（]/)[0].trim();
+                            }
+                            depts.push(currentDept);
+                            state = 0; // next dept
+                        }
+                    }
+                    j++;
+                }
+                result.deliveryDepartments = depts;
+            }
         
             // 6. 外部采购预算
             else if (line.includes('外部采购预算') || line.includes('外部采购金额')) {
@@ -1421,7 +1680,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         
             // 7. 其他字段
-            else if (line.includes('项目名称') && !line.includes('ID')) result.projectName = getValue();
+            else if (line.includes('项目名称') && !line.includes('ID')) {
+                result.projectName = getValue();
+                if (line.includes('客户名称') || line.includes('签约客户')) {
+                    const colParts = line.split(/[:：]/);
+                    if (colParts.length > 2) {
+                        result.client = colParts[2].split(/[\t\s]+(商机编号|合同编号)/)[0].trim();
+                    }
+                }
+            }
             else if (line.startsWith('签约客户') || line.startsWith('客户名称')) result.client = getValue();
             else if (line.startsWith('项目级别')) { const val = getValue(); if (val.length < 10) result.level = val; }
             else if (line.includes('产品能力')) result.capacityType = getValue();
@@ -1482,7 +1749,162 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => { element.style.backgroundColor = ''; }, 800);
     }
 
-; // End of DOMContentLoaded
+    // ==========================================
+    // 新增：左侧标签点击自动滚动右侧帮助栏 & 返回顶部浮标
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+    
+    // 1. 添加返回顶部浮标
+    const rightPanel = document.querySelector('.right-panel');
+    if (rightPanel) {
+        // 移除对 rightPanel.style.position 的修改，保留它原本在 CSS 里的 position: sticky
+
+        const fab = document.createElement('button');
+        fab.innerHTML = '⬆️<br>回顶部';
+        // 使用 fixed 让它相对整个屏幕定位，绝对不会跑出版面外
+        fab.style.position = 'fixed';
+        fab.style.bottom = '40px';
+        fab.style.right = '40px';
+        fab.style.width = '55px';
+        fab.style.height = '55px';
+        fab.style.borderRadius = '50%';
+        fab.style.backgroundColor = '#007bff';
+        fab.style.color = 'white';
+        fab.style.border = 'none';
+        fab.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+        fab.style.cursor = 'pointer';
+        fab.style.display = 'none'; // 默认隐藏
+        fab.style.zIndex = '1000';
+        fab.style.fontSize = '12px';
+        fab.style.lineHeight = '1.3';
+        fab.style.transition = 'background-color 0.3s';
+        fab.title = '返回顶部目录';
+
+        fab.addEventListener('click', (e) => {
+            e.preventDefault();
+            const container = document.querySelector('.help-content');
+            if (container) {
+                container.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+        
+        fab.addEventListener('mouseenter', () => { fab.style.backgroundColor = '#0056b3'; });
+        fab.addEventListener('mouseleave', () => { fab.style.backgroundColor = '#007bff'; });
+
+        rightPanel.appendChild(fab);
+
+        // 监听滚动事件，超过300px显示浮标
+        const container = document.querySelector('.help-content');
+        if (container) {
+            container.addEventListener('scroll', () => {
+                if (container.scrollTop > 300) {
+                    fab.style.display = 'block';
+                } else {
+                    fab.style.display = 'none';
+                }
+            });
+        }
+    }
+
+    // 2. 左侧标签联动
+    const helpMapping = {
+        'capacityType': 'index_basic_info',
+        'procurementRisk': 'index_procurementRisk',
+        'ironTriangleInput': 'index_ironTriangleInput',
+        'SJ_projectRisk': 'Index_SJ_projectRisk',
+        'SJ_projectCooperationNeeded': 'Index_SJ_projectCooperationAssessment',
+        'SJ_preInvestmentNeeded': 'Index_SJ_preInvestmentDetails',
+        'SJ_atomicCapability': 'Index_SJ_atomicCapability',
+        'TB_businessType': 'Index_TB_businessType',
+        'TB_biddingRisk': 'Index_TB_biddingRisk',
+        'TB_deliveryPeriod': 'Index_TB_deliveryPeriod',
+        'TB_deliveryRisk': 'Index_TB_deliveryRisk',
+        'TB_projectCooperationNeeded': 'Index_TB_projectCooperationAssessment',
+        'TB_maintenanceRequirements': 'Index_TB_maintenanceRequirements',
+        'TB_trialRun': 'Index_TB_trialRun',
+        'TB_isPrimarySystem': 'Index_TB_securityAssessment',
+        'TB_maintenanceAssessment': 'Index_TB_maintenanceAssessment',
+        'TB_testingRequirements': 'Index_TB_testingRequirements',
+        'TB_financialAssessment': 'Index_Index_TB_financialAssessment',
+        'JD_businessType': 'Index_JD_businessType',
+        'JD_deliveryPeriod': 'Index_JD_deliveryPeriod',
+        'JD_deliveryRisk': 'Index_JD_deliveryRisk',
+        'JD_maintenanceRequirements': 'Index_JD_maintenanceRequirements',
+        'JD_trialRun': 'Index_JD_trialRun',
+        'JD_maintenanceAssessment': 'Index_JD_maintenanceAssessment',
+        'JD_testingRequirements': 'Index_JD_testingRequirements',
+        'other-check': 'index_other_info',
+        'OT_risk': 'index_others'
+    };
+
+    Object.keys(helpMapping).forEach(inputId => {
+        const label = document.querySelector(`label[for="${inputId}"]`);
+        if (label) {
+            const icon = document.createElement('span');
+            icon.style.fontSize = '12px';
+            icon.style.cursor = 'pointer';
+            icon.title = '点击查看填写说明';
+            
+            // 针对多行标题（包含 <br>），使用 flex 布局包裹文本，保证对齐且不超出边界
+            if (label.innerHTML.includes('<br')) {
+                const originalText = label.innerHTML;
+                label.innerHTML = '';
+                
+                const textSpan = document.createElement('span');
+                textSpan.innerHTML = originalText;
+                textSpan.style.textAlign = 'right';
+                textSpan.style.lineHeight = '1.2';
+                
+                label.style.display = 'flex';
+                label.style.alignItems = 'center';
+                label.style.justifyContent = 'flex-end';
+                
+                icon.innerHTML = '📖'; 
+                icon.style.marginLeft = '4px';
+                icon.style.flexShrink = '0';
+                icon.style.position = 'relative'; // 移除之前的绝对定位
+                icon.style.left = 'auto';
+                icon.style.top = 'auto';
+                icon.style.transform = 'none';
+                
+                label.appendChild(textSpan);
+                label.appendChild(icon);
+            } else {
+                icon.innerHTML = ' 📖';
+            }
+            
+            label.style.cursor = 'pointer';
+            label.title = '点击查看填写说明';
+            
+            label.addEventListener('click', (e) => {
+                e.preventDefault(); 
+                const targetId = helpMapping[inputId];
+                const targetElement = document.getElementById(targetId);
+                const container = document.querySelector('.help-content');
+                if (targetElement && container) {
+                    const targetPosition = targetElement.offsetTop;
+                    container.scrollTo({
+                        top: targetPosition - 20,
+                        behavior: 'smooth'
+                    });
+                    
+                    const nextEl = targetElement.nextElementSibling;
+                    if (nextEl) {
+                        const originalBg = nextEl.style.backgroundColor;
+                        nextEl.style.transition = 'background-color 0.5s';
+                        nextEl.style.backgroundColor = '#ffffcc';
+                        setTimeout(() => {
+                            nextEl.style.backgroundColor = originalBg;
+                        }, 2000);
+                    }
+                }
+            });
+            
+            label.appendChild(icon);
+        }
+    });
+
+}); // End of DOMContentLoaded
 
 
 
