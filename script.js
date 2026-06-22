@@ -233,6 +233,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         btn.style.color = '#fff';
                         return;
                     }
+                } else {
+                    // 找不到项目经理也显示橙色
+                    btn.style.backgroundColor = '#fd7e14'; // 橙色警告
+                    btn.style.borderColor = '#fd7e14';
+                    btn.style.color = '#fff';
+                    return;
                 }
             }
         }
