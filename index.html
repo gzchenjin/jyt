@@ -801,7 +801,15 @@ A角：熊俊伟 B角：蒋朝豪；"
 
     <div id="email-modal" class="modal-overlay" style="display: none">
       <div class="modal-content wide">
-        <h3>邮件信息:选择需要发送邮件的部门</h3>
+        <h3>邮件配置</h3>
+        <h4>发件人信息 (自动保存用于邮件签名):</h4>
+        <div class="sender-info-form" style="display: flex; gap: 10px; margin-bottom: 15px;">
+          <input type="text" id="sender-dept" placeholder="部门" class="form-control" />
+          <input type="text" id="sender-name" placeholder="名字" class="form-control" />
+          <input type="text" id="sender-phone" placeholder="手机号" class="form-control" />
+          <input type="text" id="sender-email" placeholder="邮箱" class="form-control" />
+        </div>
+        <h4>选择需要发送邮件的部门:</h4>
         <div class="email-controls">
           <div class="spacer"></div>
           <button id="email-refresh-btn" class="btn btn-secondary">
@@ -811,9 +819,18 @@ A角：熊俊伟 B角：蒋朝豪；"
         </div>
         <div id="email-checklist" class="email-checklist-container"></div>
         <h4>收件人列表 (已去重):</h4>
-        <textarea id="email-output" readonly rows="6"></textarea>
+        <textarea id="email-output" readonly rows="4"></textarea>
+        <div class="email-send-row" style="margin-bottom: 10px;">
+          <select id="email-meeting-type" class="form-control" style="width: auto;">
+            <option value="XXX会">请选择会议类型...</option>
+            <option value="商机评估会">商机评估会</option>
+            <option value="投标评估会">投标评估会</option>
+            <option value="商机、投标评估会">商机、投标评估会</option>
+            <option value="项目交底会">项目交底会</option>
+          </select>
+        </div>
         <div class="email-send-row">
-          <input type="text" id="email-subject" placeholder="邮件主题（可选）" class="form-control" />
+          <input type="text" id="email-subject" placeholder="邮件主题（未填将自动生成）" class="form-control" />
           <button id="email-send-btn" class="btn btn-primary">📧 调用邮件客户端发送</button>
         </div>
         <button id="close-email-modal" class="btn">关闭</button>

@@ -952,6 +952,16 @@ document.addEventListener('DOMContentLoaded', function() {
     DOMElements.attendeesForm.addEventListener('change', updateAttendeesList);
     DOMElements.attendeesForm.addEventListener('input', updateAttendeesList);
 
+    // --- Sender Info LocalStorage Logic ---
+    const senderIds = ['sender-dept', 'sender-name', 'sender-phone', 'sender-email'];
+    senderIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.value = localStorage.getItem(id) || '';
+            el.addEventListener('input', () => localStorage.setItem(id, el.value));
+        }
+    });
+
     // --- Email Modal Logic ---
     document.getElementById('btn-email').addEventListener('click', () => {
         repopulateEmailDepartments();
@@ -1141,27 +1151,69 @@ document.addEventListener('DOMContentLoaded', function() {
         // Foxmail 对 mailto: 多收件人支持很差，无论逗号还是分号都会把多个地址混成一个。
         // 稳妥方案：全部收件人复制到剪贴板 → 打开 Foxmail 空邮件 → 粘贴即用。
         const recipientsForClipboard = emails.join('; ');
-        const subject = document.getElementById('email-subject').value.trim();
+        let subject = document.getElementById('email-subject').value.trim();
+        const meetingTypeDropdown = document.getElementById('email-meeting-type');
+        const meetingType = meetingTypeDropdown ? meetingTypeDropdown.value : 'XXX会';
+        const meetingText = meetingType === 'XXX会' ? 'XXX会' : meetingType;
+        
+        const projectName = document.getElementById('projectName').value || 'xxxxx项目';
+        const businessCode = document.getElementById('businessCode').value || 'SJYXGD202502000000';
+        
+        if (!subject) {
+            subject = `${projectName}（${businessCode}）${meetingText}会议纪要请各位领导查阅。`;
+        }
 
-        navigator.clipboard.writeText(recipientsForClipboard).then(() => {
-            // 只传主题，不传收件人（避免 Foxmail 解析异常）
-            const mailto = subject
-                ? 'mailto:?subject=' + encodeURIComponent(subject)
-                : 'mailto:';
-            window.location.href = mailto;
+        const senderDept = document.getElementById('sender-dept').value || '部门';
+        const senderName = document.getElementById('sender-name').value || '名字';
+        const senderPhone = document.getElementById('sender-phone').value || '手机号';
+        const senderEmail = document.getElementById('sender-email').value || '邮箱';
+        
+        const now = new Date();
+        const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+        const formData = gatherFormData();
+        let reportContent = "【请选择会议类型或在此处手动填写纪要内容】";
+        
+        if (meetingType === '商机评估会') {
+            reportContent = generateOpportunityMinutes(formData);
+        } else if (meetingType === '投标评估会' || meetingType === '商机、投标评估会') {
+            // 如果是商机、投标评估会，只给投标会纪要
+            reportContent = generateBiddingMinutes(formData);
+        } else if (meetingType === '项目交底会') {
+            reportContent = generateKickoffMinutes(formData);
+        } else {
+            const existingReport = document.getElementById('report-text').value;
+            if (existingReport) {
+                reportContent = existingReport;
+            }
+        }
+
+        // 去除纪要开头自带的项目名称、商机编号和XX会（因为邮件主题已经有了）
+        if (meetingType !== 'XXX会') {
+            reportContent = reportContent.replace(/^.*?\n\n(商机评估会|投标评估会|项目交底会)\n/, '');
+        }
+
+        let bodyText = `各位领导好：\n  以下是${projectName}（${businessCode}）${meetingText}会议纪要，请各位领导查阅。\n\n${reportContent}\n\n\n谢谢！\n====================================\n广东亿迅科技有限公司\n${senderDept} ${senderName}\n手机：${senderPhone}\n邮箱：${senderEmail}\n====================================\n${dateStr}`;
+        
+        // 统一把 \n 替换为 \r\n，以保证 Foxmail 可以正常解析多行换行格式
+        bodyText = bodyText.replace(/\r?\n/g, '\r\n');
+
+        // 关键修复：mailto 链接有 2000 字符的长度限制。由于纪要正文很长，包含在 body 参数中会导致直接失效（呼不出 Foxmail）。
+        // 解决方案：把主题和收件人放进 mailto，把长正文放进剪贴板，让用户 Ctrl+V。
+        // Foxmail 对 mailto 多收件人的兼容性：通常使用分号或逗号分隔。这里用分号尝试。
+        const mailtoUrl = `mailto:${emails.join(';')}?subject=${encodeURIComponent(subject)}`;
+
+        navigator.clipboard.writeText(bodyText).then(() => {
+            window.location.href = mailtoUrl;
 
             // 延迟弹出提示，确保 Foxmail 窗口已唤起
             setTimeout(() => {
-                alert('📋 收件人已复制到剪贴板：\n' + recipientsForClipboard + '\n\n请在 Foxmail 收件人栏粘贴 (Ctrl+V) 即可。');
+                alert('📋 【邮件已呼出，且正文已复制到剪贴板】\n\n请在弹出的 Foxmail 正文处使用 Ctrl+V 粘贴纪要内容！\n\n(若收件人未能自动填入，请手动从网页复制)');
             }, 800);
         }).catch(() => {
             // clipboard API 失败时的降级方案
-            const subject = document.getElementById('email-subject').value.trim();
-            const mailto = subject
-                ? 'mailto:?subject=' + encodeURIComponent(subject)
-                : 'mailto:';
-            window.location.href = mailto;
-            alert('📋 请手动复制收件人：\n' + recipientsForClipboard + '\n\n然后在 Foxmail 收件人栏粘贴 (Ctrl+V) 即可。');
+            window.location.href = mailtoUrl;
+            alert('📋 请手动全选上方生成的纪要内容，并在 Foxmail 中粘贴。');
         });
 
         console.log('📧 收件人已复制到剪贴板:', recipientsForClipboard);
