@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const startDateInput = document.getElementById('start-date');
     const endDateInput = document.getElementById('end-date');
     const perPageSelect = document.getElementById('per-page');
+    const sortOrderSelect = document.getElementById('sort-order');
     const prevPageBtn = document.getElementById('prev-page');
     const nextPageBtn = document.getElementById('next-page');
     const pageInfo = document.getElementById('page-info');
@@ -90,7 +91,22 @@ document.addEventListener('DOMContentLoaded', () => {
             authDiv.style.display = 'none';
             contentDiv.style.display = 'block';
             const data = await response.json();
-            populateTable(data.records);
+            
+            let recordsToDisplay = data.records || [];
+            if (sortOrderSelect && sortOrderSelect.value === 'business_code_desc') {
+                recordsToDisplay.sort((a, b) => {
+                    const codeA = a.business_code || '';
+                    const codeB = b.business_code || '';
+                    if (codeA !== codeB) {
+                        return codeA.localeCompare(codeB, 'zh-CN');
+                    }
+                    const timeA = new Date(a.created_at).getTime();
+                    const timeB = new Date(b.created_at).getTime();
+                    return timeB - timeA;
+                });
+            }
+            
+            populateTable(recordsToDisplay);
             currentPage = data.current_page;
             totalPages = data.total_pages;
             updatePaginationControls(data);
@@ -152,6 +168,12 @@ document.addEventListener('DOMContentLoaded', () => {
     filterBtn.addEventListener('click', () => {
         loadRecords(1);
     });
+
+    if (sortOrderSelect) {
+        sortOrderSelect.addEventListener('change', () => {
+            loadRecords(1);
+        });
+    }
 
     // 7. 按日期导出按钮事件
     exportFilteredBtn.addEventListener('click', () => {
